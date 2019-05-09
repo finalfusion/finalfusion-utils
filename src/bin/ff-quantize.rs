@@ -51,7 +51,7 @@ fn config_from_matches(matches: &ArgMatches) -> Config {
     let input_format = matches
         .value_of(INPUT_FORMAT)
         .map(|v| EmbeddingFormat::try_from(v).or_exit("Cannot parse input format", 1))
-        .unwrap_or(EmbeddingFormat::Word2Vec);
+        .unwrap_or(EmbeddingFormat::FinalFusion);
     let n_attempts = matches
         .value_of(N_ATTEMPTS)
         .map(|a| a.parse().or_exit("Cannot parse number of attempts", 1))
@@ -119,7 +119,12 @@ fn parse_args() -> ArgMatches<'static> {
                 .index(1)
                 .required(true),
         )
-        .arg(Arg::with_name(OUTPUT).help("Output file").index(2))
+        .arg(
+            Arg::with_name(OUTPUT)
+                .help("Output file")
+                .index(2)
+                .required(true),
+        )
         .arg(
             Arg::with_name(N_ATTEMPTS)
                 .short("a")
