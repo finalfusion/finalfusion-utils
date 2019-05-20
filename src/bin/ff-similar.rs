@@ -17,15 +17,23 @@ fn parse_args() -> ArgMatches<'static> {
             Arg::with_name("format")
                 .short("f")
                 .value_name("FORMAT")
-                .help("Embedding format: finalfusion, finalfusion_mmap, word2vec, text, or textdims (default: finalfusion)")
-                .takes_value(true),
+                .takes_value(true)
+                .possible_values(&[
+                    "finalfusion",
+                    "finalfusion_mmap",
+                    "text",
+                    "textdims",
+                    "word2vec",
+                ])
+                .default_value("finalfusion"),
         )
         .arg(
             Arg::with_name("neighbors")
                 .short("k")
                 .value_name("K")
-                .help("Return K nearest neighbors (default: 10)")
-                .takes_value(true),
+                .help("Return K nearest neighbors")
+                .takes_value(true)
+                .default_value("10"),
         )
         .arg(
             Arg::with_name("EMBEDDINGS")
@@ -49,12 +57,12 @@ fn config_from_matches<'a>(matches: &ArgMatches<'a>) -> Config {
     let embedding_format = matches
         .value_of("format")
         .map(|f| EmbeddingFormat::try_from(f).or_exit("Cannot parse embedding format", 1))
-        .unwrap_or(EmbeddingFormat::FinalFusion);
+        .unwrap();
 
     let k = matches
         .value_of("neighbors")
         .map(|v| v.parse().or_exit("Cannot parse k", 1))
-        .unwrap_or(10);
+        .unwrap();
 
     Config {
         embeddings_filename,

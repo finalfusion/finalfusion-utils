@@ -45,8 +45,9 @@ fn parse_args() -> ArgMatches<'static> {
                 .short("f")
                 .long("from")
                 .value_name("FORMAT")
-                .help("Input format: finalfusion, text, textdims, word2vec (default: word2vec)")
-                .takes_value(true),
+                .takes_value(true)
+                .possible_values(&["finalfusion", "text", "textdims", "word2vec"])
+                .default_value("word2vec"),
         )
         .arg(
             Arg::with_name(METADATA_FILENAME)
@@ -61,8 +62,9 @@ fn parse_args() -> ArgMatches<'static> {
                 .short("t")
                 .long("to")
                 .value_name("FORMAT")
-                .help("Output format: finalfusion, text, textdims, word2vec (default: finalfusion)")
-                .takes_value(true),
+                .takes_value(true)
+                .possible_values(&["finalfusion", "text", "textdims", "word2vec"])
+                .default_value("finalfusion"),
         )
         .get_matches()
 }
@@ -72,12 +74,12 @@ fn config_from_matches(matches: &ArgMatches) -> Config {
     let input_format = matches
         .value_of(INPUT_FORMAT)
         .map(|v| EmbeddingFormat::try_from(v).or_exit("Cannot parse input format", 1))
-        .unwrap_or(EmbeddingFormat::Word2Vec);
+        .unwrap();
     let output_filename = matches.value_of(OUTPUT).unwrap().to_owned();
     let output_format = matches
         .value_of(OUTPUT_FORMAT)
         .map(|v| EmbeddingFormat::try_from(v).or_exit("Cannot parse output format", 1))
-        .unwrap_or(EmbeddingFormat::FinalFusion);
+        .unwrap();
 
     let metadata_filename = matches.value_of(METADATA_FILENAME).map(ToOwned::to_owned);
 
