@@ -6,9 +6,11 @@ rust:
   - nightly
 script:
   - rustup component add clippy
+  - rustup component add rustfmt
   - cargo build --verbose
   - cargo test --verbose
   - cargo build --verbose --features "opq reductive/openblas"
+  - cargo fmt --all -- --check
   - cargo clippy -- -D warnings
 matrix:
   allow_failures:

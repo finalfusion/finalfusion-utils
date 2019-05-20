@@ -51,15 +51,15 @@ fn config_from_matches(matches: &ArgMatches) -> Config {
     let input_format = matches
         .value_of(INPUT_FORMAT)
         .map(|v| EmbeddingFormat::try_from(v).or_exit("Cannot parse input format", 1))
-        .unwrap_or(EmbeddingFormat::FinalFusion);
+        .unwrap();
     let n_attempts = matches
         .value_of(N_ATTEMPTS)
         .map(|a| a.parse().or_exit("Cannot parse number of attempts", 1))
-        .unwrap_or(1);
+        .unwrap();
     let n_iterations = matches
         .value_of(N_ITERATIONS)
         .map(|a| a.parse().or_exit("Cannot parse number of iterations", 1))
-        .unwrap_or(100);
+        .unwrap();
     let n_subquantizers = matches
         .value_of(N_SUBQUANTIZERS)
         .map(|a| a.parse().or_exit("Cannot parse number of subquantizers", 1));
@@ -70,14 +70,14 @@ fn config_from_matches(matches: &ArgMatches) -> Config {
     let quantizer = matches
         .value_of(QUANTIZER)
         .map(ToOwned::to_owned)
-        .unwrap_or_else(|| "pq".to_owned());
+        .unwrap();
     let quantizer_bits = matches
         .value_of(QUANTIZER_BITS)
         .map(|a| {
             a.parse()
                 .or_exit("Cannot parse number of quantizer_bits", 1)
         })
-        .unwrap_or(8);
+        .unwrap();
     if quantizer_bits > 8 {
         eprintln!(
             "Maximum number of quantizer bits: 8, was: {}",
@@ -130,40 +130,45 @@ fn parse_args() -> ArgMatches<'static> {
                 .short("a")
                 .long("attempts")
                 .value_name("N")
-                .help("Number of quantization attempts (default: 1)")
-                .takes_value(true),
+                .help("Number of quantization attempts")
+                .takes_value(true)
+                .default_value("1"),
         )
         .arg(
             Arg::with_name(QUANTIZER_BITS)
                 .short("b")
                 .long("bits")
                 .value_name("N")
-                .help("Number of quantizer bits (default: 8, max: 8)")
-                .takes_value(true),
+                .help("Number of quantizer bits (max: 8)")
+                .takes_value(true)
+                .default_value("8"),
         )
         .arg(
             Arg::with_name(INPUT_FORMAT)
                 .short("f")
                 .long("from")
                 .value_name("FORMAT")
-                .help("Input format: finalfusion, text, textdims, word2vec (default: word2vec)")
-                .takes_value(true),
+                .takes_value(true)
+                .possible_values(&["finalfusion", "word2vec", "text","textdims"])
+                .default_value("word2vec"),
         )
         .arg(
             Arg::with_name(N_ITERATIONS)
                 .short("i")
                 .long("iter")
                 .value_name("N")
-                .help("Number of iterations (default: 100)")
-                .takes_value(true),
+                .help("Number of iterations")
+                .takes_value(true)
+                .default_value("100"),
         )
         .arg(
             Arg::with_name(QUANTIZER)
                 .short("q")
                 .long("quantizer")
                 .value_name("QUANTIZER")
-                .help("Quantizer: opq, pq, or gaussian_opq (default: pq)")
-                .takes_value(true),
+                .takes_value(true)
+                .possible_values(&["opq", "pq", "gaussian_opq"])
+                .default_value("pq"),
         )
         .arg(
             Arg::with_name(N_SUBQUANTIZERS)

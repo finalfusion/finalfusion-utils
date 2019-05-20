@@ -1,7 +1,7 @@
 use std::io::BufRead;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
-use finalfusion::similarity::Similarity;
+use finalfusion::similarity::Analogy;
 use finalfusion_utils::{read_embeddings_view, EmbeddingFormat};
 use stdinout::{Input, OrExit};
 
@@ -11,7 +11,7 @@ static DEFAULT_CLAP_SETTINGS: &[AppSettings] = &[
 ];
 
 fn parse_args() -> ArgMatches<'static> {
-    App::new("ff-similar")
+    App::new("ff-analogy")
         .settings(DEFAULT_CLAP_SETTINGS)
         .arg(
             Arg::with_name("format")
@@ -41,7 +41,10 @@ fn parse_args() -> ArgMatches<'static> {
                 .index(1)
                 .required(true),
         )
-        .arg(Arg::with_name("INPUT").help("Input words").index(2))
+        .arg(
+            Arg::with_name("INPUT")
+            .help("Input words")
+            .index(2))
         .get_matches()
 }
 
@@ -74,10 +77,8 @@ fn config_from_matches<'a>(matches: &ArgMatches<'a>) -> Config {
 fn main() {
     let matches = parse_args();
     let config = config_from_matches(&matches);
-
     let embeddings = read_embeddings_view(&config.embeddings_filename, config.embedding_format)
         .or_exit("Cannot read embeddings", 1);
-
     let input = Input::from(matches.value_of("INPUT"));
     let reader = input.buf_read().or_exit("Cannot open input for reading", 1);
 
@@ -87,13 +88,19 @@ fn main() {
             continue;
         }
 
-        let results = match embeddings.similarity(&line, config.k) {
-            Some(results) => results,
-            None => continue,
-        };
+        let split_line: Vec<&str> = line.split_whitespace().collect();
+        if split_line.len() < 3 {
+            continue;
+        }
+        
+        let results =
+            match embeddings.analogy(&split_line[0], &split_line[1], &split_line[2], config.k) {
+                Some(results) => results,
+                None => continue,
+            };
 
-        for similar in results {
-            println!("{}\t{}", similar.word, similar.similarity);
+        for analogy in results {
+            println!("{}\t{}", analogy.word, analogy.similarity);
         }
     }
 }
