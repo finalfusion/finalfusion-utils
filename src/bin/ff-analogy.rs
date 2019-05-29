@@ -1,4 +1,5 @@
 use std::io::BufRead;
+use std::process;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use finalfusion::similarity::Analogy;
@@ -91,7 +92,8 @@ fn main() {
 
         let split_line: Vec<&str> = line.split_whitespace().collect();
         if split_line.len() != 3 {
-            continue;
+            eprintln!("Query does not consist of three tokens: {}", line);
+            process::exit(1);
         }
 
         let results =
