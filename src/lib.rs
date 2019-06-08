@@ -37,14 +37,11 @@ pub fn read_embeddings_view(
     let mut reader = BufReader::new(f);
 
     use self::EmbeddingFormat::*;
-    let embeddings = match embedding_format {
+    match embedding_format {
         FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
         FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
         Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
         Text => ReadText::read_text(&mut reader).map(Embeddings::into),
         TextDims => ReadTextDims::read_text_dims(&mut reader).map(Embeddings::into),
     }
-    .context("Cannot read embeddings")?;
-
-    Ok(embeddings)
 }
