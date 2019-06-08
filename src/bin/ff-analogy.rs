@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::io::BufRead;
 use std::process;
 
@@ -42,6 +43,15 @@ fn parse_args() -> ArgMatches<'static> {
                 .index(1)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("include")
+                .long("include")
+                .help("Specify query parts that should be allowed as answers.")
+                .possible_values(&["a", "b", "c"])
+                .multiple(true)
+                .takes_value(true)
+                .max_values(3),
+        )
         .arg(Arg::with_name("INPUT").help("Input words").index(2))
         .get_matches()
 }
@@ -50,6 +60,7 @@ struct Config {
     embeddings_filename: String,
     embedding_format: EmbeddingFormat,
     input_filename: Option<String>,
+    excludes: [bool; 3],
     k: usize,
 }
 
@@ -67,11 +78,22 @@ fn config_from_matches<'a>(matches: &ArgMatches<'a>) -> Config {
         .value_of("neighbors")
         .map(|v| v.parse().or_exit("Cannot parse k", 1))
         .unwrap();
+    let excludes = matches
+        .values_of("include")
+        .map(|v| {
+            let set = v.collect::<HashSet<_>>();
+            let exclude_a = !set.contains("a");
+            let exclude_b = !set.contains("b");
+            let exclude_c = !set.contains("c");
+            [exclude_a, exclude_b, exclude_c]
+        })
+        .unwrap_or_else(|| [true, true, true]);
 
     Config {
         embeddings_filename,
         embedding_format,
         input_filename,
+        excludes,
         k,
     }
 }
@@ -96,11 +118,16 @@ fn main() {
             process::exit(1);
         }
 
-        let results =
-            match embeddings.analogy(&split_line[0], &split_line[1], &split_line[2], config.k) {
-                Some(results) => results,
-                None => continue,
-            };
+        let results = match embeddings.analogy_masked(
+            &split_line[0],
+            &split_line[1],
+            &split_line[2],
+            config.k,
+            config.excludes,
+        ) {
+            Some(results) => results,
+            None => continue,
+        };
 
         for analogy in results {
             println!("{}\t{}", analogy.word, analogy.similarity);
