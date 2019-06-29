@@ -87,6 +87,7 @@ struct Counts {
     n_correct: usize,
     n_instances: usize,
     n_skipped: usize,
+    sum_cos: f32,
 }
 
 impl Default for Counts {
@@ -95,6 +96,7 @@ impl Default for Counts {
             n_correct: 0,
             n_instances: 0,
             n_skipped: 0,
+            sum_cos: 0.,
         }
     }
 }
@@ -127,11 +129,17 @@ impl<'a> Eval<'a> {
 
         // If the model is not able to provide a query result, it is counted
         // as an error.
-        let is_correct = self
+        let (is_correct, cos) = self
             .embeddings
             .analogy(&instance.query.0, &instance.query.1, &instance.query.2, 1)
-            .map(|r| r.first().unwrap().word == instance.answer)
-            .unwrap_or(false);
+            .map(|r| {
+                let result = r.first().unwrap();
+                (
+                    result.word == instance.answer,
+                    result.similarity.into_inner(),
+                )
+            })
+            .unwrap_or((false, 0.));
 
         let mut section_counts = self.section_counts.lock().unwrap();
         let counts = section_counts.entry(instance.section.clone()).or_default();
@@ -139,6 +147,7 @@ impl<'a> Eval<'a> {
         if is_correct {
             counts.n_correct += 1;
         }
+        counts.sum_cos += cos;
     }
 
     /// Print the accuracy for a section.
@@ -149,11 +158,12 @@ impl<'a> Eval<'a> {
         }
 
         println!(
-            "{}: {}/{} correct, accuracy: {:.2}, skipped: {}",
+            "{}: {}/{} correct, accuracy: {:.2}, avg cos: {:1.2}, skipped: {}",
             section,
             counts.n_correct,
             counts.n_instances,
             (counts.n_correct as f64 / counts.n_instances as f64) * 100.,
+            (counts.sum_cos / counts.n_instances as f32),
             counts.n_skipped,
         );
     }
@@ -175,13 +185,15 @@ impl<'a> Drop for Eval<'a> {
             .sum::<usize>();
         let n_skipped = section_counts.values().map(|c| c.n_skipped).sum::<usize>();
         let n_instances_with_skipped = n_instances + n_skipped;
+        let cos = section_counts.values().map(|c| c.sum_cos).sum::<f32>();
 
         // Print out overall counts.
         println!(
-            "Total: {}/{} correct, accuracy: {:.2}",
+            "Total: {}/{} correct, accuracy: {:.2}, avg cos: {:1.2}",
             n_correct,
             n_instances,
-            (n_correct as f64 / n_instances as f64) * 100.
+            (n_correct as f64 / n_instances as f64) * 100.,
+            (cos / n_instances as f32)
         );
 
         // Print skip counts.
