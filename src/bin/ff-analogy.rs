@@ -98,6 +98,18 @@ fn config_from_matches<'a>(matches: &ArgMatches<'a>) -> Config {
     }
 }
 
+fn print_missing_tokens(tokens: &[&str], successful: &[bool]) {
+    assert_eq!(tokens.len(), successful.len());
+
+    let missing = tokens
+        .iter()
+        .zip(successful)
+        .filter_map(|(&token, &success)| if !success { Some(token) } else { None })
+        .collect::<Vec<_>>();
+
+    eprintln!("Could not compute embedding(s) for: {}", missing.join(", "));
+}
+
 fn main() {
     let matches = parse_args();
     let config = config_from_matches(&matches);
@@ -125,8 +137,11 @@ fn main() {
             config.k,
             config.excludes,
         ) {
-            Some(results) => results,
-            None => continue,
+            Ok(results) => results,
+            Err(success) => {
+                print_missing_tokens(&split_line, &success);
+                continue;
+            }
         };
 
         for analogy in results {
