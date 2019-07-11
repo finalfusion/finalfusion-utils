@@ -89,7 +89,10 @@ fn main() {
 
         let results = match embeddings.similarity(&line, config.k) {
             Some(results) => results,
-            None => continue,
+            None => {
+                eprintln!("Could not compute embedding for: {}", line);
+                continue;
+            }
         };
 
         for similar in results {
