@@ -131,7 +131,7 @@ impl<'a> Eval<'a> {
         // as an error.
         let (is_correct, cos) = self
             .embeddings
-            .analogy(&instance.query.0, &instance.query.1, &instance.query.2, 1)
+            .analogy([&instance.query.0, &instance.query.1, &instance.query.2], 1)
             .map(|r| {
                 let result = r.first().unwrap();
                 (

@@ -1,7 +1,7 @@
 use std::io::BufRead;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
-use finalfusion::similarity::Similarity;
+use finalfusion::similarity::WordSimilarity;
 use finalfusion_utils::{read_embeddings_view, EmbeddingFormat};
 use stdinout::{Input, OrExit};
 
@@ -87,7 +87,7 @@ fn main() {
             continue;
         }
 
-        let results = match embeddings.similarity(&line, config.k) {
+        let results = match embeddings.word_similarity(&line, config.k) {
             Some(results) => results,
             None => {
                 eprintln!("Could not compute embedding for: {}", line);

@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter, Read};
 
 use clap::{App, AppSettings, Arg, ArgMatches};
-use failure::err_msg;
+use failure::{err_msg, Fallible};
 use finalfusion::prelude::*;
 use finalfusion_utils::EmbeddingFormat;
 use stdinout::OrExit;
@@ -119,7 +119,7 @@ fn main() {
         embeddings.set_metadata(metadata);
     }
 
-    write_embeddings(&embeddings, &config);
+    write_embeddings(&embeddings, &config).or_exit("Cannot write embeddings", 1)
 }
 
 fn read_metadata(filename: impl AsRef<str>) -> Value {
@@ -151,17 +151,21 @@ fn read_embeddings(
     .or_exit("Cannot read embeddings", 1)
 }
 
-fn write_embeddings(embeddings: &Embeddings<VocabWrap, StorageWrap>, config: &Config) {
+fn write_embeddings(
+    embeddings: &Embeddings<VocabWrap, StorageWrap>,
+    config: &Config,
+) -> Fallible<()> {
     let f = File::create(&config.output_filename).or_exit("Cannot create embeddings file", 1);
     let mut writer = BufWriter::new(f);
 
     use self::EmbeddingFormat::*;
     match config.output_format {
-        FinalFusion => embeddings.write_embeddings(&mut writer),
-        FinalFusionMmap => Err(err_msg("Writing to this format is not supported")),
-        Word2Vec => embeddings.write_word2vec_binary(&mut writer, config.unnormalize),
-        Text => embeddings.write_text(&mut writer, config.unnormalize),
-        TextDims => embeddings.write_text_dims(&mut writer, config.unnormalize),
-    }
-    .or_exit("Cannot write embeddings", 1)
+        FinalFusion => embeddings.write_embeddings(&mut writer)?,
+        FinalFusionMmap => Err(err_msg("Writing to this format is not supported"))?,
+        Word2Vec => embeddings.write_word2vec_binary(&mut writer, config.unnormalize)?,
+        Text => embeddings.write_text(&mut writer, config.unnormalize)?,
+        TextDims => embeddings.write_text_dims(&mut writer, config.unnormalize)?,
+    };
+
+    Ok(())
 }
