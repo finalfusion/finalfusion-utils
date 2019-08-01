@@ -131,11 +131,9 @@ fn main() {
         }
 
         let results = match embeddings.analogy_masked(
-            &split_line[0],
-            &split_line[1],
-            &split_line[2],
-            config.k,
+            [&split_line[0], &split_line[1], &split_line[2]],
             config.excludes,
+            config.k,
         ) {
             Ok(results) => results,
             Err(success) => {
