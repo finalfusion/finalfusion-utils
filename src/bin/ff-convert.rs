@@ -3,6 +3,7 @@ use std::io::{BufReader, BufWriter, Read};
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use failure::{err_msg, Fallible};
+use finalfusion::fasttext::ReadFastText;
 use finalfusion::prelude::*;
 use finalfusion_utils::EmbeddingFormat;
 use stdinout::OrExit;
@@ -48,7 +49,7 @@ fn parse_args() -> ArgMatches<'static> {
                 .long("from")
                 .value_name("FORMAT")
                 .takes_value(true)
-                .possible_values(&["finalfusion", "text", "textdims", "word2vec"])
+                .possible_values(&["fasttext", "finalfusion", "text", "textdims", "word2vec"])
                 .default_value("word2vec"),
         )
         .arg(
@@ -142,6 +143,7 @@ fn read_embeddings(
 
     use self::EmbeddingFormat::*;
     match embedding_format {
+        FastText => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
         FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
         FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
         Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
@@ -160,6 +162,7 @@ fn write_embeddings(
 
     use self::EmbeddingFormat::*;
     match config.output_format {
+        FastText => Err(err_msg("Writing to the fastText format is not supported"))?,
         FinalFusion => embeddings.write_embeddings(&mut writer)?,
         FinalFusionMmap => Err(err_msg("Writing to this format is not supported"))?,
         Word2Vec => embeddings.write_word2vec_binary(&mut writer, config.unnormalize)?,

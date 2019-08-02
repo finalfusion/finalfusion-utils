@@ -3,10 +3,12 @@ use std::io::BufReader;
 
 use failure::{format_err, Error, ResultExt};
 
+use finalfusion::fasttext::ReadFastText;
 use finalfusion::prelude::*;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum EmbeddingFormat {
+    FastText,
     FinalFusion,
     FinalFusionMmap,
     Word2Vec,
@@ -19,6 +21,7 @@ impl EmbeddingFormat {
         use self::EmbeddingFormat::*;
 
         match format.as_ref() {
+            "fasttext" => Ok(FastText),
             "finalfusion" => Ok(FinalFusion),
             "finalfusion_mmap" => Ok(FinalFusionMmap),
             "word2vec" => Ok(Word2Vec),
@@ -38,6 +41,7 @@ pub fn read_embeddings_view(
 
     use self::EmbeddingFormat::*;
     let embeds = match embedding_format {
+        FastText => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
         FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
         FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
         Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
