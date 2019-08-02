@@ -146,7 +146,7 @@ fn parse_args() -> ArgMatches<'static> {
                 .long("from")
                 .value_name("FORMAT")
                 .takes_value(true)
-                .possible_values(&["finalfusion", "text", "textdims", "word2vec"])
+                .possible_values(&["fasttext", "finalfusion", "text", "textdims", "word2vec"])
                 .default_value("word2vec"),
         )
         .arg(

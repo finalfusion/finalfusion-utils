@@ -21,6 +21,7 @@ fn parse_args() -> ArgMatches<'static> {
                 .value_name("FORMAT")
                 .takes_value(true)
                 .possible_values(&[
+                    "fasttext",
                     "finalfusion",
                     "finalfusion_mmap",
                     "word2vec",
