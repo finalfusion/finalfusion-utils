@@ -3,7 +3,6 @@ use std::io::{BufReader, BufWriter, Read};
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 use failure::{err_msg, Fallible};
-use finalfusion::fasttext::ReadFastText;
 use finalfusion::prelude::*;
 use finalfusion_utils::EmbeddingFormat;
 use stdinout::OrExit;

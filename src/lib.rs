@@ -3,7 +3,6 @@ use std::io::BufReader;
 
 use failure::{format_err, Error, ResultExt};
 
-use finalfusion::fasttext::ReadFastText;
 use finalfusion::prelude::*;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
