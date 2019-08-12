@@ -19,11 +19,13 @@ struct Config {
     metadata_filename: Option<String>,
     input_format: EmbeddingFormat,
     output_format: EmbeddingFormat,
+    lossy: bool,
     unnormalize: bool,
 }
 
 // Option constants
 static INPUT_FORMAT: &str = "input_format";
+static LOSSY: &str = "lossy";
 static METADATA_FILENAME: &str = "metadata_filename";
 static OUTPUT_FORMAT: &str = "output_format";
 static UNNORMALIZE: &str = "unnormalize";
@@ -50,6 +52,12 @@ fn parse_args() -> ArgMatches<'static> {
                 .takes_value(true)
                 .possible_values(&["fasttext", "finalfusion", "text", "textdims", "word2vec"])
                 .default_value("word2vec"),
+        )
+        .arg(
+            Arg::with_name(LOSSY)
+                .long("lossy")
+                .help("do not fail on malformed UTF-8 byte sequences")
+                .takes_value(false),
         )
         .arg(
             Arg::with_name(METADATA_FILENAME)
@@ -98,6 +106,7 @@ fn config_from_matches(matches: &ArgMatches) -> Config {
         input_format,
         output_format,
         metadata_filename,
+        lossy: matches.is_present(LOSSY),
         unnormalize: matches.is_present(UNNORMALIZE),
     }
 }
@@ -112,7 +121,7 @@ fn main() {
         .map(read_metadata)
         .map(Metadata);
 
-    let mut embeddings = read_embeddings(&config.input_filename, config.input_format);
+    let mut embeddings = read_embeddings(&config.input_filename, config.input_format, config.lossy);
 
     // Overwrite metadata if provided, otherwise retain existing metadata.
     if metadata.is_some() {
@@ -136,18 +145,25 @@ fn read_metadata(filename: impl AsRef<str>) -> Value {
 fn read_embeddings(
     filename: &str,
     embedding_format: EmbeddingFormat,
+    lossy: bool,
 ) -> Embeddings<VocabWrap, StorageWrap> {
     let f = File::open(filename).or_exit("Cannot open embeddings file", 1);
     let mut reader = BufReader::new(f);
 
     use self::EmbeddingFormat::*;
-    match embedding_format {
-        FastText => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
-        FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
-        FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
-        Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
-        Text => ReadText::read_text(&mut reader).map(Embeddings::into),
-        TextDims => ReadTextDims::read_text_dims(&mut reader).map(Embeddings::into),
+    match (embedding_format, lossy) {
+        (FastText, true) => ReadFastText::read_fasttext_lossy(&mut reader).map(Embeddings::into),
+        (FastText, false) => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
+        (FinalFusion, _) => ReadEmbeddings::read_embeddings(&mut reader),
+        (FinalFusionMmap, _) => MmapEmbeddings::mmap_embeddings(&mut reader),
+        (Word2Vec, true) => {
+            ReadWord2Vec::read_word2vec_binary_lossy(&mut reader).map(Embeddings::into)
+        }
+        (Word2Vec, false) => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
+        (Text, true) => ReadText::read_text_lossy(&mut reader).map(Embeddings::into),
+        (Text, false) => ReadText::read_text(&mut reader).map(Embeddings::into),
+        (TextDims, true) => ReadTextDims::read_text_dims_lossy(&mut reader).map(Embeddings::into),
+        (TextDims, false) => ReadTextDims::read_text_dims(&mut reader).map(Embeddings::into),
     }
     .or_exit("Cannot read embeddings", 1)
 }
