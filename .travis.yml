@@ -1,18 +1,4 @@
 language: rust
-rust:
-  - 1.32.0
-  - stable
-script:
-  - rustup component add clippy
-  - rustup component add rustfmt
-  - cargo build --verbose
-  - cargo test --verbose
-  - cargo build --verbose --features "opq reductive/openblas"
-  - cargo fmt --all -- --check
-  - cargo clippy -- -D warnings
-matrix:
-  allow_failures:
-    - rust: nightly
 sudo: required
 dist: trusty
 addons:
@@ -20,3 +6,10 @@ addons:
     packages:
       - libopenblas-dev
       - gfortran
+rust:
+  - 1.32.0
+  - stable
+install:
+  - rustup component add clippy
+  - rustup component add rustfmt
+script: ci/script.sh
