@@ -1,10 +1,9 @@
 language: rust
 sudo: required
-dist: trusty
+dist: bionic
 addons:
   apt:
     packages:
-      - libopenblas-dev
       - gfortran
 rust:
   - 1.32.0

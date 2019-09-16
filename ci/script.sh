@@ -4,7 +4,7 @@ set -ex
 
 cargo build --verbose
 cargo test --verbose
-cargo build --verbose --features "opq reductive/openblas"
+cargo build --verbose --features "netlib"
 
 # On Rust 1.32.0, we only care about passing tests.
 if rustc --version | grep -v "^rustc 1.32.0"; then
