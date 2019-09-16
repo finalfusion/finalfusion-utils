@@ -186,7 +186,7 @@ fn parse_args() -> ArgMatches<'static> {
         .get_matches()
 }
 
-fn print_loss(storage: &StorageView, quantized_storage: &Storage) {
+fn print_loss(storage: &dyn StorageView, quantized_storage: &dyn Storage) {
     let mut cosine_similarity_sum = 0f32;
     let mut euclidean_distance_sum = 0f32;
 
