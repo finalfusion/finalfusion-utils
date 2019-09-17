@@ -1,4 +1,6 @@
-use clap::{App, AppSettings};
+use std::io::stdout;
+
+use clap::{App, AppSettings, Arg, Shell, SubCommand};
 
 mod analogy;
 
@@ -34,14 +36,28 @@ fn main() {
         similar::SimilarApp::app(),
     ];
 
-    let matches = App::new("finalfusion")
+    let cli = App::new("finalfusion")
         .settings(DEFAULT_CLAP_SETTINGS)
         .subcommands(apps)
-        .get_matches();
+        .subcommand(
+            SubCommand::with_name("completions")
+                .about("Generate completion scripts for your shell")
+                .setting(AppSettings::ArgRequiredElseHelp)
+                .arg(Arg::with_name("shell").possible_values(&Shell::variants())),
+        );
+    let matches = cli.clone().get_matches();
 
     match matches.subcommand_name().unwrap() {
         "analogy" => {
             analogy::AnalogyApp::parse(matches.subcommand_matches("analogy").unwrap()).run()
+        }
+        "completions" => {
+            let shell = matches
+                .subcommand_matches("completions")
+                .unwrap()
+                .value_of("shell")
+                .unwrap();
+            write_completion_script(cli, shell.parse::<Shell>().unwrap());
         }
         "compute-accuracy" => {
             analogy::AnalogyApp::parse(matches.subcommand_matches("compute-accuracy").unwrap())
@@ -61,4 +77,8 @@ fn main() {
         }
         _unknown => unreachable!(),
     }
+}
+
+fn write_completion_script(mut cli: App, shell: Shell) {
+    cli.gen_completions_to("finalfusion", shell, &mut stdout());
 }
