@@ -5,81 +5,82 @@ use std::sync::{Arc, Mutex};
 use clap::{App, AppSettings, Arg, ArgMatches};
 use finalfusion::prelude::*;
 use finalfusion::similarity::Analogy;
-use finalfusion_utils::{read_embeddings_view, EmbeddingFormat};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
 use stdinout::{Input, OrExit};
+
+use crate::io::{read_embeddings_view, EmbeddingFormat};
+use crate::FinalfusionApp;
 
 static DEFAULT_CLAP_SETTINGS: &[AppSettings] = &[
     AppSettings::DontCollapseArgsInUsage,
     AppSettings::UnifiedHelpMessage,
 ];
 
-fn main() {
-    let matches = parse_args();
-    let config = config_from_matches(&matches);
-
-    ThreadPoolBuilder::new()
-        .num_threads(config.n_threads)
-        .build_global()
-        .unwrap();
-
-    let embeddings =
-        read_embeddings_view(&config.embeddings_filename, EmbeddingFormat::FinalFusion)
-            .or_exit("Cannot read embeddings", 1);
-
-    let analogies_file = Input::from(config.analogies_filename);
-    let reader = analogies_file
-        .buf_read()
-        .or_exit("Cannot open analogy file for reading", 1);
-
-    let instances = read_analogies(reader);
-    process_analogies(&embeddings, &instances);
-}
-
 // Option constants
 static EMBEDDINGS: &str = "EMBEDDINGS";
 static ANALOGIES: &str = "ANALOGIES";
 static THREADS: &str = "threads";
 
-fn parse_args() -> ArgMatches<'static> {
-    App::new("ff-compute-accuracy")
-        .settings(DEFAULT_CLAP_SETTINGS)
-        .arg(
-            Arg::with_name(THREADS)
-                .long("threads")
-                .value_name("N")
-                .help("Number of threads (default: logical_cpus / 2)")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name(EMBEDDINGS)
-                .help("Embedding file")
-                .index(1)
-                .required(true),
-        )
-        .arg(Arg::with_name(ANALOGIES).help("Analogy file").index(2))
-        .get_matches()
-}
-
-struct Config {
+pub struct ComputeAccuracyApp {
     analogies_filename: Option<String>,
     embeddings_filename: String,
     n_threads: usize,
 }
 
-fn config_from_matches(matches: &ArgMatches) -> Config {
-    let embeddings_filename = matches.value_of(EMBEDDINGS).unwrap().to_owned();
-    let analogies_filename = matches.value_of(ANALOGIES).map(ToOwned::to_owned);
-    let n_threads = matches
-        .value_of("threads")
-        .map(|v| v.parse().or_exit("Cannot parse number of threads", 1))
-        .unwrap_or(num_cpus::get() / 2);
+impl FinalfusionApp for ComputeAccuracyApp {
+    fn app() -> App<'static, 'static> {
+        App::new("compute-accuracy")
+            .about("Compute prediction accuracy on a set of analogies")
+            .settings(DEFAULT_CLAP_SETTINGS)
+            .arg(
+                Arg::with_name(THREADS)
+                    .long("threads")
+                    .value_name("N")
+                    .help("Number of threads (default: logical_cpus / 2)")
+                    .takes_value(true),
+            )
+            .arg(
+                Arg::with_name(EMBEDDINGS)
+                    .help("Embedding file")
+                    .index(1)
+                    .required(true),
+            )
+            .arg(Arg::with_name(ANALOGIES).help("Analogy file").index(2))
+    }
 
-    Config {
-        analogies_filename,
-        embeddings_filename,
-        n_threads,
+    fn parse(matches: &ArgMatches) -> Self {
+        let embeddings_filename = matches.value_of(EMBEDDINGS).unwrap().to_owned();
+        let analogies_filename = matches.value_of(ANALOGIES).map(ToOwned::to_owned);
+        let n_threads = matches
+            .value_of("threads")
+            .map(|v| v.parse().or_exit("Cannot parse number of threads", 1))
+            .unwrap_or(num_cpus::get() / 2);
+
+        ComputeAccuracyApp {
+            analogies_filename,
+            embeddings_filename,
+            n_threads,
+        }
+    }
+
+    fn run(&self) {
+        ThreadPoolBuilder::new()
+            .num_threads(self.n_threads)
+            .build_global()
+            .unwrap();
+
+        let embeddings =
+            read_embeddings_view(&self.embeddings_filename, EmbeddingFormat::FinalFusion)
+                .or_exit("Cannot read embeddings", 1);
+
+        let analogies_file = Input::from(self.analogies_filename.as_ref());
+        let reader = analogies_file
+            .buf_read()
+            .or_exit("Cannot open analogy file for reading", 1);
+
+        let instances = read_analogies(reader);
+        process_analogies(&embeddings, &instances);
     }
 }
 
