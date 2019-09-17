@@ -12,6 +12,10 @@ repository = "https://github.com/finalfusion/finalfusion-rust"
 license-file = "LICENSE.md"
 readme = "README.md"
 
+[[bin]]
+name = "finalfusion"
+path = "src/main.rs"
+
 [dependencies]
 clap = "2"
 env_logger = "0.6"
