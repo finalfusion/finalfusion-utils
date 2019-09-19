@@ -5,10 +5,25 @@ addons:
   apt:
     packages:
       - gfortran
-rust:
-  - 1.32.0
-  - stable
+      - musl-tools
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-musl
+    - os: linux
+      rust: 1.32.0
+      env: TARGET=x86_64-unknown-linux-gnu
 install:
-  - rustup component add clippy
-  - rustup component add rustfmt
+  - |
+    if [[ $TRAVIS_OS_NAME = linux && ${TARGET} != x86_64-unknown-linux-gnu ]]; then
+      rustup target add ${TARGET}
+    else
+      rustup component add clippy
+      rustup component add rustfmt
+    fi
 script: ci/script.sh
