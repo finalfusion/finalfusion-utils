@@ -1,23 +1,26 @@
 language: rust
 sudo: required
 dist: bionic
+env:
+  global:
+  - PROJECT_NAME: finalfusion-utils
 addons:
   apt:
     packages:
-      - gfortran
-      - musl-tools
+    - gfortran
+    - musl-tools
 matrix:
   fast_finish: true
   include:
-    - os: linux
-      rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu
-    - os: linux
-      rust: stable
-      env: TARGET=x86_64-unknown-linux-musl
-    - os: linux
-      rust: 1.32.0
-      env: TARGET=x86_64-unknown-linux-gnu
+  - os: linux
+    rust: stable
+    env: TARGET=x86_64-unknown-linux-gnu
+  - os: linux
+    rust: stable
+    env: TARGET=x86_64-unknown-linux-musl
+  - os: linux
+    rust: 1.32.0
+    env: TARGET=x86_64-unknown-linux-gnu
 install:
   - |
     if [[ $TRAVIS_OS_NAME = linux && ${TARGET} != x86_64-unknown-linux-gnu ]]; then
@@ -27,3 +30,14 @@ install:
       rustup component add rustfmt
     fi
 script: ci/script.sh
+before_deploy: ci/before_deploy.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: Jptvbuhmivxp7rKl/VSeK3mTBBqrmw/QTfNyW03Vle80Gr1kNRCOsznG6As6S9qkAuJIAgsS7V0A+DVkj70jNR40Qdi93n4ySzCLDy119cnOSstdPMxUOQe8MFStRxHVkr+lNx+0CltwbR3aUIFNaPOQaWOX7smPq9GPl22cgAMzHWM/YbqIuGZ0kJW7cWH/yPlazr3kDMR8dsy7MtwHKZtYxaU0Kfnv+tUre6AvoalEy6SCLrNivRvyFDXydWYQs5q7WdadnQ5Fw3wwWzp1mgqflR0DzhZI+9RIRjdbzfLf+O+CbYxzaBpdg11T8FHOxDXQO8o38qCNPv3qw36K8o+r60Hnjh3EkNRlIbzy72z9VcVNtLi38YEOIyW0bEvIZcna1/wjsg6A0Yc0Vcpc/RsM42Gw7Zwqpj2halMCZxMfdKXFgYkaRsEYpD18jcEthOmd/qcQ1vB77mt00gAJ6v/IkBFFtDxn9HKbXVyrgkOyY6ymqMAmSV2B/Im+Bc83aZfJXBu2RX9xZBebJ20JCjHsaOQ5f2trN77lXWByV+hPynCfw996sm5huTD4fv1bvFV9ks3plvJDbLGiallgD452FQRPs2YFZ9FH6xBglgVRWkVtA8jYM5fbI3vjgvIT9eB2GEghHXSIO+u4eKz73Z9pF82gQVO52OsBh53JM3U=
+  file_glob: true
+  file: deployment/${PROJECT_NAME}-${TRAVIS_TAG}-${TARGET}.tar.gz
+  on:
+    condition: $TRAVIS_RUST_VERSION = stable
+    repo: finalfusion/finalfusion-utils
+    tags: true
