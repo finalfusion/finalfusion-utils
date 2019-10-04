@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use clap::{App, AppSettings, Arg, ArgMatches};
 use finalfusion::prelude::*;
 use finalfusion::similarity::Analogy;
+use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
 use stdinout::{Input, OrExit};
@@ -243,8 +244,16 @@ fn read_analogies(reader: impl BufRead) -> Vec<Instance> {
 }
 
 fn process_analogies(embeddings: &Embeddings<VocabWrap, StorageViewWrap>, instances: &[Instance]) {
+    let pb = ProgressBar::new(instances.len() as u64);
+    pb.set_style(
+        ProgressStyle::default_bar().template("{bar:30} {percent}% {msg} ETA: {eta_precise}"),
+    );
     let eval = Eval::new(&embeddings);
-    instances
-        .par_iter()
-        .for_each(|instance| eval.eval_analogy(instance));
+    instances.par_iter().enumerate().for_each(|(i, instance)| {
+        if i % 50 == 0 {
+            pb.inc(50);
+        }
+        eval.eval_analogy(instance)
+    });
+    pb.finish();
 }

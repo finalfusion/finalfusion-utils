@@ -20,11 +20,12 @@ path = "src/main.rs"
 clap = "2"
 env_logger = "0.6"
 failure = "0.1"
+indicatif = "0.11"
 ndarray = "0.12"
 num_cpus = "1"
 rayon = "1"
 reductive = "0.3"
-finalfusion = "0.10"
+finalfusion = { git = "https://github.com/finalfusion/finalfusion-rust" }
 stdinout = "0.4"
 toml = "0.5"
 
