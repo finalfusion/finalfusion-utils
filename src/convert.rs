@@ -177,9 +177,9 @@ fn write_embeddings(
 
     use self::EmbeddingFormat::*;
     match config.output_format {
-        FastText => Err(err_msg("Writing to the fastText format is not supported"))?,
+        FastText => return Err(err_msg("Writing to the fastText format is not supported")),
         FinalFusion => embeddings.write_embeddings(&mut writer)?,
-        FinalFusionMmap => Err(err_msg("Writing to this format is not supported"))?,
+        FinalFusionMmap => return Err(err_msg("Writing to this format is not supported")),
         Word2Vec => embeddings.write_word2vec_binary(&mut writer, config.unnormalize)?,
         Text => embeddings.write_text(&mut writer, config.unnormalize)?,
         TextDims => embeddings.write_text_dims(&mut writer, config.unnormalize)?,
