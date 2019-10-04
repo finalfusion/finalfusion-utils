@@ -59,10 +59,10 @@ fn main() {
                 .unwrap();
             write_completion_script(cli, shell.parse::<Shell>().unwrap());
         }
-        "compute-accuracy" => {
-            analogy::AnalogyApp::parse(matches.subcommand_matches("compute-accuracy").unwrap())
-                .run()
-        }
+        "compute-accuracy" => compute_accuracy::ComputeAccuracyApp::parse(
+            matches.subcommand_matches("compute-accuracy").unwrap(),
+        )
+        .run(),
         "convert" => {
             convert::ConvertApp::parse(matches.subcommand_matches("convert").unwrap()).run()
         }
