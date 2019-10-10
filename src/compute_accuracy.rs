@@ -122,7 +122,13 @@ impl<'a> Eval<'a> {
         // Skip instances where the to-be-predicted word is not in the
         // vocab. This is a shortcoming of the vocab size and not of the
         // embedding model itself.
-        if self.embeddings.vocab().idx(&instance.answer).is_none() {
+        if self
+            .embeddings
+            .vocab()
+            .idx(&instance.answer)
+            .and_then(|idx| idx.word())
+            .is_none()
+        {
             let mut section_counts = self.section_counts.lock().unwrap();
             let counts = section_counts.entry(instance.section.clone()).or_default();
             counts.n_skipped += 1;
