@@ -14,5 +14,10 @@ stdenv.mkDerivation rec {
     # OpenBLAS backend
     gfortran.cc.lib
     openblasCompat
+
+    # MKL
+    mkl
+    openssl
+    pkgconfig
   ];
 }
