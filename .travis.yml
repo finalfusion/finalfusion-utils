@@ -6,7 +6,7 @@ addons:
     packages:
       - gfortran
 rust:
-  - 1.32.0
+  - 1.37.0
   - stable
 install:
   - rustup component add clippy
