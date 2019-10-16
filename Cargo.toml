@@ -18,19 +18,19 @@ path = "src/main.rs"
 
 [dependencies]
 clap = "2"
-env_logger = "0.6"
+env_logger = "0.7"
 failure = "0.1"
-indicatif = "0.11"
-ndarray = "0.12"
+indicatif = "0.12"
+ndarray = "0.13"
 num_cpus = "1"
 rayon = "1"
-reductive = "0.3"
+reductive = "0.4"
 finalfusion = { git = "https://github.com/finalfusion/finalfusion-rust" }
 stdinout = "0.4"
 toml = "0.5"
 
 [dependencies.openblas-src]
-version = "0.6"
+version = "0.7"
 optional = true
 
 [features]

@@ -208,18 +208,18 @@ fn print_loss(storage: &dyn StorageView, quantized_storage: &dyn Storage) {
 
     for (idx, embedding) in storage.view().outer_iter().enumerate() {
         let reconstruction = quantized_storage.embedding(idx);
-        cosine_similarity_sum += cosine_similarity(embedding, reconstruction.as_view());
-        euclidean_distance_sum += euclidean_distance(embedding, reconstruction.as_view());
+        cosine_similarity_sum += cosine_similarity(embedding, reconstruction.view());
+        euclidean_distance_sum += euclidean_distance(embedding, reconstruction.view());
     }
 
     eprintln!(
         "Average cosine similarity: {}",
-        cosine_similarity_sum / storage.view().rows() as f32
+        cosine_similarity_sum / storage.view().nrows() as f32
     );
 
     eprintln!(
         "Average euclidean distance: {}",
-        euclidean_distance_sum / storage.view().rows() as f32
+        euclidean_distance_sum / storage.view().nrows() as f32
     );
 }
 
