@@ -17,8 +17,6 @@ mod quantize;
 mod similar;
 
 mod traits;
-
-mod reconstruct;
 pub use self::traits::FinalfusionApp;
 
 static DEFAULT_CLAP_SETTINGS: &[AppSettings] = &[
@@ -36,7 +34,6 @@ fn main() {
         metadata::MetadataApp::app(),
         quantize::QuantizeApp::app(),
         similar::SimilarApp::app(),
-        reconstruct::ReconstructApp::app(),
     ];
 
     let cli = App::new("finalfusion")
@@ -77,10 +74,6 @@ fn main() {
         }
         "similar" => {
             similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap()).run()
-        }
-        "reconstruct" => {
-            reconstruct::ReconstructApp::parse(matches.subcommand_matches("reconstruct").unwrap())
-                .run()
         }
         _unknown => unreachable!(),
     }
