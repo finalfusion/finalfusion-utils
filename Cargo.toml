@@ -25,7 +25,7 @@ ndarray = "0.13"
 num_cpus = "1"
 rayon = "1"
 reductive = "0.4"
-finalfusion = { git = "https://github.com/finalfusion/finalfusion-rust" }
+finalfusion = "0.11"
 stdinout = "0.4"
 toml = "0.5"
 

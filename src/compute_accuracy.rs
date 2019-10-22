@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use clap::{App, AppSettings, Arg, ArgMatches};
 use finalfusion::prelude::*;
 use finalfusion::similarity::Analogy;
+use finalfusion::vocab::Vocab;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
