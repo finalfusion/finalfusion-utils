@@ -3,7 +3,11 @@ use std::io::BufWriter;
 use std::process;
 
 use clap::{App, Arg, ArgMatches};
+use finalfusion::embeddings::Quantize;
+use finalfusion::io::WriteEmbeddings;
 use finalfusion::prelude::*;
+use finalfusion::storage::{QuantizedArray, Storage, StorageView};
+use finalfusion::vocab::Vocab;
 use ndarray::ArrayView1;
 use rayon::ThreadPoolBuilder;
 use reductive::pq::PQ;
@@ -229,7 +233,7 @@ fn quantize_embeddings<V, S>(
     embeddings: &Embeddings<V, S>,
 ) -> Embeddings<V, QuantizedArray>
 where
-    V: Vocab,
+    V: Vocab + Clone,
     S: StorageView,
 {
     let n_subquantizers = config
@@ -257,7 +261,7 @@ fn quantize_embeddings<V, S>(
     embeddings: &Embeddings<V, S>,
 ) -> Embeddings<V, QuantizedArray>
 where
-    V: Vocab,
+    V: Vocab + Clone,
     S: StorageView,
 {
     let n_subquantizers = config
