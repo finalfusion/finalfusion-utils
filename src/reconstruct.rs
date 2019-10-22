@@ -2,7 +2,9 @@ use std::fs::File;
 use std::io::BufWriter;
 
 use clap::{App, Arg, ArgMatches};
+use finalfusion::io::WriteEmbeddings;
 use finalfusion::prelude::*;
+use finalfusion::storage::{NdArray, Storage};
 use ndarray::Array2;
 use rayon::ThreadPoolBuilder;
 use stdinout::OrExit;
