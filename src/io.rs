@@ -78,9 +78,15 @@ pub fn read_quantized_embeddings(
 
     use self::QuantizedEmbeddingFormat::*;
     let embeds = match embedding_format {
-        FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
-        FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
+        FinalFusion => {
+            let quantized_embeds: Embeddings<VocabWrap, QuantizedArray> = ReadEmbeddings::read_embeddings(&mut reader)?;
+            quantized_embeds.into();
+        }
+        FinalFusionMmap => {
+            let quantized_embeddings: Embeddings<VocabWrap, MmapQuantizedArray> = MmapEmbeddings::mmap_embeddings(&mut reader)?;
+            quantized_embeds.into();
+        }
     };
 
-    Ok(embeds?)
+    Ok(embeds)
 }

@@ -31,13 +31,13 @@ impl FinalfusionApp for ReconstructApp {
             .about("Reconstruct embedding matrices from quantized embeddings")
             .arg(
                 Arg::with_name(INPUT)
-                    .help("Finalfrontier model")
+                    .help("Finalfusion model")
                     .index(1)
                     .required(true),
             )
             .arg(
                 Arg::with_name(OUTPUT)
-                    .help("Output file")
+                    .help("Output finalfusion model")
                     .index(2)
                     .required(true),
             )
@@ -65,7 +65,7 @@ impl FinalfusionApp for ReconstructApp {
         let input_filename = matches.value_of(INPUT).unwrap().to_owned();
         let output_filename = matches.value_of(OUTPUT).unwrap().to_owned();
 
-        //Options
+        // Options
         let n_threads = matches
             .value_of(N_THREADS)
             .map(|a| a.parse().or_exit("Cannot parse number of threads", 1))
