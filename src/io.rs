@@ -4,6 +4,8 @@ use std::io::BufReader;
 use failure::{format_err, Error, ResultExt};
 
 use finalfusion::prelude::*;
+use finalfusion::storage::MmapQuantizedArray;
+use finalfusion::storage::QuantizedArray;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum EmbeddingFormat {
@@ -77,14 +79,16 @@ pub fn read_quantized_embeddings(
     let mut reader = BufReader::new(f);
 
     use self::QuantizedEmbeddingFormat::*;
-    let embeds = match embedding_format {
+    let embeds: Embeddings<VocabWrap, StorageWrap> = match embedding_format {
         FinalFusion => {
-            let quantized_embeds: Embeddings<VocabWrap, QuantizedArray> = ReadEmbeddings::read_embeddings(&mut reader)?;
-            quantized_embeds.into();
+            let quantized_embeds: Embeddings<VocabWrap, QuantizedArray> =
+                ReadEmbeddings::read_embeddings(&mut reader)?;
+            quantized_embeds.into()
         }
         FinalFusionMmap => {
-            let quantized_embeddings: Embeddings<VocabWrap, MmapQuantizedArray> = MmapEmbeddings::mmap_embeddings(&mut reader)?;
-            quantized_embeds.into();
+            let quantized_embeds: Embeddings<_, MmapQuantizedArray> =
+                MmapEmbeddings::mmap_embeddings(&mut reader)?;
+            quantized_embeds.into()
         }
     };
 

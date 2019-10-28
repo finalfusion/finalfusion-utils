@@ -2,8 +2,13 @@ use std::fs::File;
 use std::io::BufWriter;
 
 use clap::{App, Arg, ArgMatches};
+use finalfusion::io::WriteEmbeddings;
+use finalfusion::norms::NdNorms;
 use finalfusion::prelude::*;
-use ndarray::Array2;
+use finalfusion::storage::{NdArray, Storage};
+use finalfusion::vocab::Vocab;
+use ndarray::{Array1, Array2};
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use rayon::ThreadPoolBuilder;
 use stdinout::OrExit;
 
@@ -91,24 +96,29 @@ impl FinalfusionApp for ReconstructApp {
             .num_threads(self.n_threads)
             .build_global()
             .unwrap();
-
         let embeddings = read_quantized_embeddings(&self.input_filename, self.input_format)
             .or_exit("Cannot read embeddings", 1);
         let (metadata, vocab, storage, norms) = embeddings.into_parts();
 
         // Reconstruct storage
         let reconstructed_storage = reconstruct_storage(&storage);
+        let nd_norms = match norms {
+            None => NdNorms::new(Array1::ones(embeddings.vocab().vocab_len())),
+            Some(inner) => inner,
+        };
         let reconstructed_embeddings =
-            Embeddings::new(metadata, vocab, reconstructed_storage, norms.unwrap());
+            Embeddings::new(metadata, vocab, reconstructed_storage, nd_norms);
         write_embeddings(&reconstructed_embeddings, &self.output_filename);
     }
 }
 
 fn reconstruct_storage(storage: &StorageWrap) -> NdArray {
     let mut reconstructions = Array2::zeros(storage.shape());
-    for (idx, mut reconstruction) in reconstructions.outer_iter_mut().enumerate() {
-        reconstruction.assign(&storage.embedding(idx));
-    }
+    reconstructions
+        .outer_iter_mut()
+        .into_par_iter()
+        .enumerate()
+        .map(|(idx, row)| row.assign(&storage.embedding(idx)));
     reconstructions.into()
 }
 
