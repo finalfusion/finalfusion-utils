@@ -49,7 +49,7 @@ impl FinalfusionApp for QuantizeApp {
             .about("Quantize embedding matrices")
             .arg(
                 Arg::with_name(INPUT)
-                    .help("Finalfrontier model")
+                    .help("finalfusion model")
                     .index(1)
                     .required(true),
             )

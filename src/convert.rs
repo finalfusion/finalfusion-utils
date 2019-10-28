@@ -41,7 +41,7 @@ impl FinalfusionApp for ConvertApp {
             .about("Convert between embedding formats")
             .arg(
                 Arg::with_name(INPUT)
-                    .help("Finalfrontier model")
+                    .help("finalfusion model")
                     .index(1)
                     .required(true),
             )
