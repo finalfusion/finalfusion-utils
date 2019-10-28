@@ -3,6 +3,10 @@ use std::io::{BufReader, BufWriter, Read};
 
 use clap::{App, Arg, ArgMatches};
 use failure::{err_msg, Fallible};
+use finalfusion::compat::text::{WriteText, WriteTextDims};
+use finalfusion::compat::word2vec::WriteWord2Vec;
+use finalfusion::io::{ReadEmbeddings, WriteEmbeddings};
+use finalfusion::metadata::Metadata;
 use finalfusion::prelude::*;
 use stdinout::OrExit;
 use toml::Value;
@@ -37,7 +41,7 @@ impl FinalfusionApp for ConvertApp {
             .about("Convert between embedding formats")
             .arg(
                 Arg::with_name(INPUT)
-                    .help("Finalfrontier model")
+                    .help("finalfusion model")
                     .index(1)
                     .required(true),
             )
@@ -118,7 +122,7 @@ impl FinalfusionApp for ConvertApp {
             .metadata_filename
             .as_ref()
             .map(read_metadata)
-            .map(Metadata);
+            .map(Metadata::new);
 
         let mut embeddings = read_embeddings(&self.input_filename, self.input_format, self.lossy);
 
