@@ -1,10 +1,9 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Write};
-use std::ops::Deref;
 
 use clap::{App, Arg, ArgMatches};
-use finalfusion::metadata::Metadata;
 use finalfusion::io::ReadMetadata;
+use finalfusion::metadata::Metadata;
 use stdinout::{OrExit, Output};
 use toml::ser::to_string_pretty;
 
@@ -50,7 +49,7 @@ impl FinalfusionApp for MetadataApp {
         if let Some(metadata) = read_metadata(&self.input_filename) {
             writer
                 .write_all(
-                    to_string_pretty(&metadata.deref())
+                    to_string_pretty(&*metadata)
                         .or_exit("Cannot serialize metadata to TOML", 1)
                         .as_bytes(),
                 )
