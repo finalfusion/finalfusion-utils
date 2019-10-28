@@ -14,6 +14,8 @@ mod metadata;
 
 mod quantize;
 
+mod reconstruct;
+
 mod similar;
 
 mod traits;
@@ -33,6 +35,7 @@ fn main() {
         convert::ConvertApp::app(),
         metadata::MetadataApp::app(),
         quantize::QuantizeApp::app(),
+        reconstruct::ReconstructApp::app(),
         similar::SimilarApp::app(),
     ];
 
@@ -71,6 +74,10 @@ fn main() {
         }
         "quantize" => {
             quantize::QuantizeApp::parse(matches.subcommand_matches("quantize").unwrap()).run()
+        }
+        "reconstruct" => {
+            reconstruct::ReconstructApp::parse(matches.subcommand_matches("reconstruct").unwrap())
+                .run()
         }
         "similar" => {
             similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap()).run()
