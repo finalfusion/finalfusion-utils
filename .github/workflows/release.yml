@@ -7,7 +7,14 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        target: [x86_64-unknown-linux-musl]
+      matrix:
+        os: [macos-latest]
+        target: [x86_64-apple-darwin]
     steps:
     - uses: actions/checkout@v1
     - name: Get release version
@@ -16,7 +23,7 @@ jobs:
       with:
         profile: minimal
         toolchain: stable
-        target: x86_64-unknown-linux-musl
+        target: ${{ matrix.target }}
         override: true
     - uses: actions-rs/cargo@v1
       with:
@@ -25,7 +32,7 @@ jobs:
     - name: Create release archive
       id: create_archive
       run: |
-        ARCHIVE=finalfusion-${TAG_NAME}-x86_64-unknown-linux-musl.tar.gz
+        ARCHIVE=finalfusion-${TAG_NAME}-${{matrix.target}}.tar.gz
         strip target/release/finalfusion
         tar -czvf ${ARCHIVE} -C target/release finalfusion
         echo ::set-output name=ASSET::$ARCHIVE
