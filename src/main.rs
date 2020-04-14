@@ -1,5 +1,6 @@
 use std::io::stdout;
 
+use anyhow::Result;
 use clap::{App, AppSettings, Arg, Shell, SubCommand};
 
 mod analogy;
@@ -25,7 +26,7 @@ static DEFAULT_CLAP_SETTINGS: &[AppSettings] = &[
     AppSettings::SubcommandRequiredElseHelp,
 ];
 
-fn main() {
+fn main() -> Result<()> {
     // Known subapplications.
     let apps = vec![
         analogy::AnalogyApp::app(),
@@ -49,7 +50,7 @@ fn main() {
 
     match matches.subcommand_name().unwrap() {
         "analogy" => {
-            analogy::AnalogyApp::parse(matches.subcommand_matches("analogy").unwrap()).run()
+            analogy::AnalogyApp::parse(matches.subcommand_matches("analogy").unwrap())?.run()
         }
         "completions" => {
             let shell = matches
@@ -58,22 +59,23 @@ fn main() {
                 .value_of("shell")
                 .unwrap();
             write_completion_script(cli, shell.parse::<Shell>().unwrap());
+            Ok(())
         }
         "compute-accuracy" => compute_accuracy::ComputeAccuracyApp::parse(
             matches.subcommand_matches("compute-accuracy").unwrap(),
-        )
+        )?
         .run(),
         "convert" => {
-            convert::ConvertApp::parse(matches.subcommand_matches("convert").unwrap()).run()
+            convert::ConvertApp::parse(matches.subcommand_matches("convert").unwrap())?.run()
         }
         "metadata" => {
-            metadata::MetadataApp::parse(matches.subcommand_matches("metadata").unwrap()).run()
+            metadata::MetadataApp::parse(matches.subcommand_matches("metadata").unwrap())?.run()
         }
         "quantize" => {
-            quantize::QuantizeApp::parse(matches.subcommand_matches("quantize").unwrap()).run()
+            quantize::QuantizeApp::parse(matches.subcommand_matches("quantize").unwrap())?.run()
         }
         "similar" => {
-            similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap()).run()
+            similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap())?.run()
         }
         _unknown => unreachable!(),
     }

@@ -1,9 +1,13 @@
+use anyhow::Result;
 use clap::{App, ArgMatches};
 
-pub trait FinalfusionApp {
+pub trait FinalfusionApp
+where
+    Self: Sized,
+{
     fn app() -> App<'static, 'static>;
 
-    fn parse(matches: &ArgMatches) -> Self;
+    fn parse(matches: &ArgMatches) -> Result<Self>;
 
-    fn run(&self);
+    fn run(&self) -> Result<()>;
 }
