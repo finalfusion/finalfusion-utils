@@ -12,9 +12,10 @@ analogy queries as well as evaluation on analogy datasets.
 
 ## Installation
 
-Installing `finalfusion-utils` requires a Rust toolchain
-with minimum version `1.32` which can be installed via
-rustup.
+### Using `cargo`
+
+Installing `finalfusion-utils` requires a Rust toolchain with minimum
+version `1.37` which can be installed via rustup.
 
 With a valid Rust toolchain, the crate is most easily
 installed through `cargo`:
@@ -22,6 +23,39 @@ installed through `cargo`:
 ~~~shell
 $ cargo install finalfusion-utils
 ~~~
+
+## Using Nix
+
+The development version of `finalfusion-utils` can be directly
+installed from its repository using the [Nix](https://nixos.org/nix/)
+package manager. To install the current version from the `master`
+branch into your user profile:
+
+```bash
+$ nix-env -i \
+  -f https://github.com/finalfusion/finalfusion-utils/tarball/master
+```
+
+To install the latest release version of `finalfusion-utils`, we
+recommend you to use the [finalfusion package
+set](https://github.com/finalfusion/nix-packages). To install the
+current release version into your user profile:
+
+```bash
+nix-env -i \
+  -f https://github.com/finalfusion/nix-packages/tarball/master \
+  -A finalfusion-utils
+```
+
+You can get prebuilt Linux/macOS binaries using the [finalfusion
+Cachix cache](https://finalfusion.cachix.org):
+
+```bash
+# If you haven't installed Cachix yet:
+$ nix-env -iA cachix -f https://cachix.org/api/v1/install
+$ cachix use finalfusion
+```
+
 
 ## Building from source
 

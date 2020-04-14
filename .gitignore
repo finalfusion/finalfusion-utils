@@ -1,3 +1,6 @@
 .*
 *.bk
 target
+
+# Nix output
+result*
