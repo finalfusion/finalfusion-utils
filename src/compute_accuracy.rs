@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::io::BufRead;
 use std::sync::{Arc, Mutex};
 
+use anyhow::{Context, Result};
 use clap::{App, AppSettings, Arg, ArgMatches};
 use finalfusion::prelude::*;
 use finalfusion::similarity::Analogy;
@@ -9,7 +10,7 @@ use finalfusion::vocab::Vocab;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
-use stdinout::{Input, OrExit};
+use stdinout::Input;
 
 use crate::io::{read_embeddings_view, EmbeddingFormat};
 use crate::FinalfusionApp;
@@ -51,22 +52,26 @@ impl FinalfusionApp for ComputeAccuracyApp {
             .arg(Arg::with_name(ANALOGIES).help("Analogy file").index(2))
     }
 
-    fn parse(matches: &ArgMatches) -> Self {
+    fn parse(matches: &ArgMatches) -> Result<Self> {
         let embeddings_filename = matches.value_of(EMBEDDINGS).unwrap().to_owned();
         let analogies_filename = matches.value_of(ANALOGIES).map(ToOwned::to_owned);
         let n_threads = matches
             .value_of("threads")
-            .map(|v| v.parse().or_exit("Cannot parse number of threads", 1))
+            .map(|v| {
+                v.parse()
+                    .context(format!("Cannot parse number of threads: {}", v))
+            })
+            .transpose()?
             .unwrap_or(num_cpus::get() / 2);
 
-        ComputeAccuracyApp {
+        Ok(ComputeAccuracyApp {
             analogies_filename,
             embeddings_filename,
             n_threads,
-        }
+        })
     }
 
-    fn run(&self) {
+    fn run(&self) -> Result<()> {
         ThreadPoolBuilder::new()
             .num_threads(self.n_threads)
             .build_global()
@@ -74,15 +79,17 @@ impl FinalfusionApp for ComputeAccuracyApp {
 
         let embeddings =
             read_embeddings_view(&self.embeddings_filename, EmbeddingFormat::FinalFusion)
-                .or_exit("Cannot read embeddings", 1);
+                .context("Cannot read embeddings")?;
 
         let analogies_file = Input::from(self.analogies_filename.as_ref());
         let reader = analogies_file
             .buf_read()
-            .or_exit("Cannot open analogy file for reading", 1);
+            .context("Cannot open analogy file for reading")?;
 
-        let instances = read_analogies(reader);
+        let instances = read_analogies(reader)?;
         process_analogies(&embeddings, &instances);
+
+        Ok(())
     }
 }
 
@@ -221,13 +228,13 @@ struct Instance {
     answer: String,
 }
 
-fn read_analogies(reader: impl BufRead) -> Vec<Instance> {
+fn read_analogies(reader: impl BufRead) -> Result<Vec<Instance>> {
     let mut section = String::new();
 
     let mut instances = Vec::new();
 
     for line in reader.lines() {
-        let line = line.or_exit("Cannot read line.", 1);
+        let line = line.context("Cannot read line")?;
 
         if line.starts_with(": ") {
             section = line.chars().skip(2).collect::<String>();
@@ -247,7 +254,7 @@ fn read_analogies(reader: impl BufRead) -> Vec<Instance> {
         });
     }
 
-    instances
+    Ok(instances)
 }
 
 fn process_analogies(embeddings: &Embeddings<VocabWrap, StorageViewWrap>, instances: &[Instance]) {

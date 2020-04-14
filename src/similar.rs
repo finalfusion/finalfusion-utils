@@ -1,8 +1,9 @@
 use std::io::BufRead;
 
+use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
 use finalfusion::similarity::WordSimilarity;
-use stdinout::{Input, OrExit};
+use stdinout::Input;
 
 use super::FinalfusionApp;
 use crate::io::{read_embeddings_view, EmbeddingFormat};
@@ -50,38 +51,46 @@ impl FinalfusionApp for SimilarApp {
             .arg(Arg::with_name("INPUT").help("Input words").index(2))
     }
 
-    fn parse(matches: &ArgMatches) -> Self {
+    fn parse(matches: &ArgMatches) -> Result<Self> {
         let input = matches.value_of("INPUT").map(ToOwned::to_owned);
 
         let embeddings_filename = matches.value_of("EMBEDDINGS").unwrap().to_owned();
 
         let embedding_format = matches
             .value_of("format")
-            .map(|f| EmbeddingFormat::try_from(f).or_exit("Cannot parse embedding format", 1))
+            .map(|f| {
+                EmbeddingFormat::try_from(f)
+                    .context(format!("Cannot parse embedding format: {}", f))
+            })
+            .transpose()?
             .unwrap();
 
         let k = matches
             .value_of("neighbors")
-            .map(|v| v.parse().or_exit("Cannot parse k", 1))
+            .map(|k| {
+                k.parse()
+                    .context(format!("Cannot parse number of neighbors: {}", k))
+            })
+            .transpose()?
             .unwrap();
 
-        SimilarApp {
+        Ok(SimilarApp {
             input,
             embeddings_filename,
             embedding_format,
             k,
-        }
+        })
     }
 
-    fn run(&self) {
+    fn run(&self) -> Result<()> {
         let embeddings = read_embeddings_view(&self.embeddings_filename, self.embedding_format)
-            .or_exit("Cannot read embeddings", 1);
+            .context("Cannot read embeddings")?;
 
         let input = Input::from(self.input.as_ref());
-        let reader = input.buf_read().or_exit("Cannot open input for reading", 1);
+        let reader = input.buf_read().context("Cannot open input for reading")?;
 
         for line in reader.lines() {
-            let line = line.or_exit("Cannot read line", 1).trim().to_owned();
+            let line = line.context("Cannot read line")?.trim().to_owned();
             if line.is_empty() {
                 continue;
             }
@@ -98,5 +107,7 @@ impl FinalfusionApp for SimilarApp {
                 println!("{}\t{}", similar.word, similar.similarity);
             }
         }
+
+        Ok(())
     }
 }

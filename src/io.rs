@@ -1,11 +1,12 @@
+use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
 
-use failure::{format_err, Error, ResultExt};
+use anyhow::{anyhow, Context, Result};
 
 use finalfusion::prelude::*;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EmbeddingFormat {
     FastText,
     FinalFusion,
@@ -16,7 +17,7 @@ pub enum EmbeddingFormat {
 }
 
 impl EmbeddingFormat {
-    pub fn try_from(format: impl AsRef<str>) -> Result<Self, Error> {
+    pub fn try_from(format: impl AsRef<str>) -> Result<Self> {
         use self::EmbeddingFormat::*;
 
         match format.as_ref() {
@@ -26,15 +27,31 @@ impl EmbeddingFormat {
             "word2vec" => Ok(Word2Vec),
             "text" => Ok(Text),
             "textdims" => Ok(TextDims),
-            unknown => Err(format_err!("Unknown embedding format: {}", unknown)),
+            unknown => Err(anyhow!("Unknown embedding format: {}", unknown)),
         }
+    }
+}
+
+impl fmt::Display for EmbeddingFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use EmbeddingFormat::*;
+        let s = match self {
+            FastText => "fasttext",
+            FinalFusion => "finalfusion",
+            FinalFusionMmap => "finalfusion_mmap",
+            Word2Vec => "word2vec",
+            Text => "text",
+            TextDims => "textdims",
+        };
+
+        f.write_str(s)
     }
 }
 
 pub fn read_embeddings_view(
     filename: &str,
     embedding_format: EmbeddingFormat,
-) -> Result<Embeddings<VocabWrap, StorageViewWrap>, Error> {
+) -> Result<Embeddings<VocabWrap, StorageViewWrap>> {
     let f = File::open(filename).context("Cannot open embeddings file")?;
     let mut reader = BufReader::new(f);
 

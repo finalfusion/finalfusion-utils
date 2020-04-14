@@ -1,10 +1,11 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Write};
 
+use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
 use finalfusion::io::ReadMetadata;
 use finalfusion::metadata::Metadata;
-use stdinout::{OrExit, Output};
+use stdinout::Output;
 use toml::ser::to_string_pretty;
 
 use crate::FinalfusionApp;
@@ -31,35 +32,37 @@ impl FinalfusionApp for MetadataApp {
             .arg(Arg::with_name(OUTPUT).help("Output file").index(2))
     }
 
-    fn parse(matches: &ArgMatches) -> Self {
+    fn parse(matches: &ArgMatches) -> Result<Self> {
         let input_filename = matches.value_of(INPUT).unwrap().to_owned();
         let output_filename = matches.value_of(OUTPUT).map(ToOwned::to_owned);
 
-        MetadataApp {
+        Ok(MetadataApp {
             input_filename,
             output_filename,
-        }
+        })
     }
 
-    fn run(&self) {
+    fn run(&self) -> Result<()> {
         let output = Output::from(self.output_filename.as_ref());
-        let mut writer =
-            BufWriter::new(output.write().or_exit("Cannot open output for writing", 1));
+        let mut writer = BufWriter::new(output.write().context("Cannot open output for writing")?);
 
-        if let Some(metadata) = read_metadata(&self.input_filename) {
+        if let Some(metadata) = read_metadata(&self.input_filename)? {
             writer
                 .write_all(
                     to_string_pretty(&*metadata)
-                        .or_exit("Cannot serialize metadata to TOML", 1)
+                        .context("Cannot serialize metadata to TOML")?
                         .as_bytes(),
                 )
-                .or_exit("Cannot write metadata", 1);
+                .context("Cannot write metadata")?;
         }
+
+        Ok(())
     }
 }
 
-fn read_metadata(filename: &str) -> Option<Metadata> {
-    let f = File::open(filename).or_exit("Cannot open embeddings file", 1);
+fn read_metadata(filename: &str) -> Result<Option<Metadata>> {
+    let f = File::open(filename).context(format!("Cannot open embeddings file: {}", filename))?;
     let mut reader = BufReader::new(f);
-    ReadMetadata::read_metadata(&mut reader).or_exit("Cannot read metadata", 1)
+    ReadMetadata::read_metadata(&mut reader)
+        .context(format!("Cannot read metadata from {}", filename))
 }

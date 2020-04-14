@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::process;
 
+use anyhow::{ensure, Context, Result};
 use clap::{App, Arg, ArgMatches};
 use finalfusion::embeddings::Quantize;
 use finalfusion::io::WriteEmbeddings;
@@ -13,7 +14,6 @@ use rayon::ThreadPoolBuilder;
 use reductive::pq::PQ;
 #[cfg(feature = "opq")]
 use reductive::pq::{GaussianOPQ, OPQ};
-use stdinout::OrExit;
 
 use crate::io::{read_embeddings_view, EmbeddingFormat};
 use crate::FinalfusionApp;
@@ -122,7 +122,7 @@ impl FinalfusionApp for QuantizeApp {
             )
     }
 
-    fn parse(matches: &ArgMatches) -> Self {
+    fn parse(matches: &ArgMatches) -> Result<Self> {
         // Arguments
         let input_filename = matches.value_of(INPUT).unwrap().to_owned();
         let output_filename = matches.value_of(OUTPUT).unwrap().to_owned();
@@ -130,40 +130,58 @@ impl FinalfusionApp for QuantizeApp {
         // Options
         let input_format = matches
             .value_of(INPUT_FORMAT)
-            .map(|v| EmbeddingFormat::try_from(v).or_exit("Cannot parse input format", 1))
+            .map(|v| {
+                EmbeddingFormat::try_from(v).context(format!("Cannot parse input format: {}", v))
+            })
+            .transpose()?
             .unwrap();
         let n_attempts = matches
             .value_of(N_ATTEMPTS)
-            .map(|a| a.parse().or_exit("Cannot parse number of attempts", 1))
+            .map(|a| {
+                a.parse()
+                    .context(format!("Cannot parse number of attempts: {}", a))
+            })
+            .transpose()?
             .unwrap();
         let n_iterations = matches
             .value_of(N_ITERATIONS)
-            .map(|a| a.parse().or_exit("Cannot parse number of iterations", 1))
+            .map(|i| {
+                i.parse()
+                    .context(format!("Cannot parse number of iterations: {}", i))
+            })
+            .transpose()?
             .unwrap();
         let n_subquantizers = matches
             .value_of(N_SUBQUANTIZERS)
-            .map(|a| a.parse().or_exit("Cannot parse number of subquantizers", 1));
+            .map(|n| {
+                n.parse()
+                    .context(format!("Cannot parse number of subquantizers: {}", n))
+            })
+            .transpose()?;
         let n_threads = matches
             .value_of(N_THREADS)
-            .map(|a| a.parse().or_exit("Cannot parse number of threads", 1))
+            .map(|n| {
+                n.parse()
+                    .context(format!("Cannot parse number of threads: {}", n))
+            })
+            .transpose()?
             .unwrap_or(num_cpus::get() / 2);
         let quantizer = matches.value_of(QUANTIZER).map(ToOwned::to_owned).unwrap();
         let quantizer_bits = matches
             .value_of(QUANTIZER_BITS)
-            .map(|a| {
-                a.parse()
-                    .or_exit("Cannot parse number of quantizer_bits", 1)
+            .map(|n| {
+                n.parse()
+                    .context(format!("Cannot parse number of quantizer_bits: {}", n))
             })
+            .transpose()?
             .unwrap();
-        if quantizer_bits > 8 {
-            eprintln!(
-                "Maximum number of quantizer bits: 8, was: {}",
-                quantizer_bits
-            );
-            process::exit(1);
-        }
+        ensure!(
+            quantizer_bits > 0 && quantizer_bits <= 8,
+            "The number of quantizer bits should be in [1, 8], was: {}",
+            quantizer_bits
+        );
 
-        QuantizeApp {
+        Ok(QuantizeApp {
             input_filename,
             input_format,
             n_attempts,
@@ -173,10 +191,10 @@ impl FinalfusionApp for QuantizeApp {
             output_filename,
             quantizer,
             quantizer_bits,
-        }
+        })
     }
 
-    fn run(&self) {
+    fn run(&self) -> Result<()> {
         env_logger::init();
 
         ThreadPoolBuilder::new()
@@ -185,13 +203,15 @@ impl FinalfusionApp for QuantizeApp {
             .unwrap();
 
         let embeddings = read_embeddings_view(&self.input_filename, self.input_format)
-            .or_exit("Cannot read embeddings", 1);
+            .context("Cannot read embeddings")?;
 
         // Quantize
         let quantized_embeddings = quantize_embeddings(&self, &embeddings);
-        write_embeddings(&quantized_embeddings, &self.output_filename);
+        write_embeddings(&quantized_embeddings, &self.output_filename)?;
 
         print_loss(embeddings.storage(), quantized_embeddings.storage());
+
+        Ok(())
     }
 }
 
@@ -297,10 +317,14 @@ where
     }
 }
 
-fn write_embeddings(embeddings: &Embeddings<VocabWrap, QuantizedArray>, filename: &str) {
-    let f = File::create(filename).or_exit("Cannot create embeddings file", 1);
+fn write_embeddings(
+    embeddings: &Embeddings<VocabWrap, QuantizedArray>,
+    filename: &str,
+) -> Result<()> {
+    let f =
+        File::create(filename).context(format!("Cannot create embeddings file: {}", filename))?;
     let mut writer = BufWriter::new(f);
     embeddings
         .write_embeddings(&mut writer)
-        .or_exit("Cannot write embeddings", 1)
+        .context("Cannot write embeddings")
 }
