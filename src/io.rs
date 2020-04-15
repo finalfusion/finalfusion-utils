@@ -1,8 +1,9 @@
+use std::convert::TryFrom;
 use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Context, Error, Result};
 
 use finalfusion::prelude::*;
 
@@ -16,11 +17,13 @@ pub enum EmbeddingFormat {
     TextDims,
 }
 
-impl EmbeddingFormat {
-    pub fn try_from(format: impl AsRef<str>) -> Result<Self> {
+impl TryFrom<&str> for EmbeddingFormat {
+    type Error = Error;
+
+    fn try_from(format: &str) -> Result<Self> {
         use self::EmbeddingFormat::*;
 
-        match format.as_ref() {
+        match format {
             "fasttext" => Ok(FastText),
             "finalfusion" => Ok(FinalFusion),
             "finalfusion_mmap" => Ok(FinalFusionMmap),
