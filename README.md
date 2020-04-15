@@ -14,8 +14,8 @@ analogy queries as well as evaluation on analogy datasets.
 
 ### Using `cargo`
 
-Installing `finalfusion-utils` requires a Rust toolchain with minimum
-version `1.37` which can be installed via rustup.
+`finalfusion-utils` can be installed using an up-to-date Rust
+toolchain, which can be installed with [rustup](https://rustup.rs).
 
 With a valid Rust toolchain, the crate is most easily
 installed through `cargo`:
@@ -24,7 +24,7 @@ installed through `cargo`:
 $ cargo install finalfusion-utils
 ~~~
 
-## Using Nix
+### Using Nix
 
 The development version of `finalfusion-utils` can be directly
 installed from its repository using the [Nix](https://nixos.org/nix/)
