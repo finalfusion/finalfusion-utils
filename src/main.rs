@@ -15,10 +15,14 @@ mod metadata;
 
 mod quantize;
 
+mod reconstruct;
+
 mod similar;
 
 mod traits;
 pub use self::traits::FinalfusionApp;
+
+pub mod util;
 
 static DEFAULT_CLAP_SETTINGS: &[AppSettings] = &[
     AppSettings::DontCollapseArgsInUsage,
@@ -34,6 +38,7 @@ fn main() -> Result<()> {
         convert::ConvertApp::app(),
         metadata::MetadataApp::app(),
         quantize::QuantizeApp::app(),
+        reconstruct::ReconstructApp::app(),
         similar::SimilarApp::app(),
     ];
 
@@ -73,6 +78,10 @@ fn main() -> Result<()> {
         }
         "quantize" => {
             quantize::QuantizeApp::parse(matches.subcommand_matches("quantize").unwrap())?.run()
+        }
+        "reconstruct" => {
+            reconstruct::ReconstructApp::parse(matches.subcommand_matches("reconstruct").unwrap())?
+                .run()
         }
         "similar" => {
             similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap())?.run()
