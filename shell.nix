@@ -1,11 +1,9 @@
 with import <nixpkgs> {};
 
-stdenv.mkDerivation rec {
-  name = "finalfusion-utils-env";
-  env = buildEnv { name = name; paths = buildInputs; };
-
+mkShell {
   nativeBuildInputs = [
-    latest.rustChannels.stable.rust
+    cargo
+    clippy
   ];
 
   buildInputs = [
@@ -14,10 +12,5 @@ stdenv.mkDerivation rec {
     # OpenBLAS backend
     gfortran.cc.lib
     openblasCompat
-
-    # MKL
-    mkl
-    openssl
-    pkgconfig
-  ];
+  ] ++ lib.optional stdenv.isDarwin darwin.Security;
 }
