@@ -9,6 +9,7 @@ assert !(withMkl && withOpenblas);
 
 let
   sources = import ./nix/sources.nix;
+  mkl = pkgs.callPackage nix/mkl.nix {};
   crateTools = pkgs.callPackage "${sources.crate2nix}/tools.nix" {};
   cargoNix = pkgs.callPackage (crateTools.generatedCargoNix {
     name = "finalfrontier";
