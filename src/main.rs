@@ -17,6 +17,8 @@ mod quantize;
 
 mod reconstruct;
 
+mod select;
+
 mod similar;
 
 mod traits;
@@ -39,6 +41,7 @@ fn main() -> Result<()> {
         metadata::MetadataApp::app(),
         quantize::QuantizeApp::app(),
         reconstruct::ReconstructApp::app(),
+        select::SelectApp::app(),
         similar::SimilarApp::app(),
     ];
 
@@ -83,6 +86,7 @@ fn main() -> Result<()> {
             reconstruct::ReconstructApp::parse(matches.subcommand_matches("reconstruct").unwrap())?
                 .run()
         }
+        "select" => select::SelectApp::parse(matches.subcommand_matches("select").unwrap())?.run(),
         "similar" => {
             similar::SimilarApp::parse(matches.subcommand_matches("similar").unwrap())?.run()
         }
