@@ -1,12 +1,9 @@
 use std::convert::TryFrom;
-use std::fs::File;
-use std::io::BufWriter;
 use std::process;
 
 use anyhow::{ensure, Context, Result};
 use clap::{App, Arg, ArgMatches};
 use finalfusion::embeddings::Quantize;
-use finalfusion::io::WriteEmbeddings;
 use finalfusion::prelude::*;
 use finalfusion::storage::{QuantizedArray, Storage, StorageView};
 use finalfusion::vocab::Vocab;
@@ -16,7 +13,7 @@ use reductive::pq::PQ;
 #[cfg(feature = "opq")]
 use reductive::pq::{GaussianOPQ, OPQ};
 
-use crate::io::{read_embeddings_view, EmbeddingFormat};
+use crate::io::{read_embeddings_view, write_embeddings, EmbeddingFormat};
 use crate::FinalfusionApp;
 
 // Option constants
@@ -207,8 +204,13 @@ impl FinalfusionApp for QuantizeApp {
             .context("Cannot read embeddings")?;
 
         // Quantize
-        let quantized_embeddings = quantize_embeddings(&self, &embeddings);
-        write_embeddings(&quantized_embeddings, &self.output_filename)?;
+        let quantized_embeddings = quantize_embeddings(&self, &embeddings).into();
+        write_embeddings(
+            &quantized_embeddings,
+            &self.output_filename,
+            EmbeddingFormat::FinalFusion,
+            false,
+        )?;
 
         print_loss(embeddings.storage(), quantized_embeddings.storage());
 
@@ -316,16 +318,4 @@ where
             process::exit(1);
         }
     }
-}
-
-fn write_embeddings(
-    embeddings: &Embeddings<VocabWrap, QuantizedArray>,
-    filename: &str,
-) -> Result<()> {
-    let f =
-        File::create(filename).context(format!("Cannot create embeddings file: {}", filename))?;
-    let mut writer = BufWriter::new(f);
-    embeddings
-        .write_embeddings(&mut writer)
-        .context("Cannot write embeddings")
 }

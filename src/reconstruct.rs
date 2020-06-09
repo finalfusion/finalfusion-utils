@@ -1,16 +1,15 @@
 use std::fs::File;
-use std::io::{BufReader, BufWriter};
+use std::io::BufReader;
 
 use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
-use finalfusion::io::WriteEmbeddings;
 use finalfusion::norms::NdNorms;
 use finalfusion::prelude::*;
-use finalfusion::storage::Reconstruct;
-use finalfusion::storage::{NdArray, QuantizedArray};
+use finalfusion::storage::{NdArray, QuantizedArray, Reconstruct};
 use finalfusion::vocab::Vocab;
 use ndarray::{s, Array2};
 
+use crate::io::{write_embeddings, EmbeddingFormat};
 use crate::util::l2_normalize_array;
 use crate::FinalfusionApp;
 
@@ -70,17 +69,13 @@ impl FinalfusionApp for ReconstructApp {
             )),
         };
 
-        let embeddings = Embeddings::new(metadata, vocab, array.into(), norms);
+        let embeddings = Embeddings::new(metadata, vocab, NdArray::from(array).into(), norms);
 
-        write_embeddings(&embeddings, &self.output_filename)
+        write_embeddings(
+            &embeddings,
+            &self.output_filename,
+            EmbeddingFormat::FinalFusion,
+            false,
+        )
     }
-}
-
-fn write_embeddings(embeddings: &Embeddings<VocabWrap, NdArray>, filename: &str) -> Result<()> {
-    let f =
-        File::create(filename).context(format!("Cannot create embeddings file: {}", filename))?;
-    let mut writer = BufWriter::new(f);
-    embeddings
-        .write_embeddings(&mut writer)
-        .context("Cannot write embeddings")
 }
