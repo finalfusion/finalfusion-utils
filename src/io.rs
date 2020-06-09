@@ -1,10 +1,13 @@
 use std::convert::TryFrom;
 use std::fmt;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, BufWriter};
 
-use anyhow::{anyhow, Context, Error, Result};
+use anyhow::{anyhow, bail, Context, Error, Result};
 
+use finalfusion::compat::text::{WriteText, WriteTextDims};
+use finalfusion::compat::word2vec::WriteWord2Vec;
+use finalfusion::io::WriteEmbeddings;
 use finalfusion::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -69,4 +72,27 @@ pub fn read_embeddings_view(
     };
 
     Ok(embeds?)
+}
+
+pub fn write_embeddings(
+    embeddings: &Embeddings<VocabWrap, StorageWrap>,
+    filename: &str,
+    format: EmbeddingFormat,
+    unnormalize: bool,
+) -> Result<()> {
+    let f =
+        File::create(filename).context(format!("Cannot create embeddings file: {}", filename))?;
+    let mut writer = BufWriter::new(f);
+
+    use self::EmbeddingFormat::*;
+    match format {
+        FastText => bail!("Writing to the fastText format is not supported"),
+        FinalFusion => embeddings.write_embeddings(&mut writer)?,
+        FinalFusionMmap => bail!("Writing to memory-mapped finalfusion file is not supported"),
+        Word2Vec => embeddings.write_word2vec_binary(&mut writer, unnormalize)?,
+        Text => embeddings.write_text(&mut writer, unnormalize)?,
+        TextDims => embeddings.write_text_dims(&mut writer, unnormalize)?,
+    };
+
+    Ok(())
 }

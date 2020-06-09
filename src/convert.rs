@@ -1,17 +1,15 @@
 use std::convert::TryFrom;
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Read};
+use std::io::{BufReader, Read};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
-use finalfusion::compat::text::{WriteText, WriteTextDims};
-use finalfusion::compat::word2vec::WriteWord2Vec;
-use finalfusion::io::{ReadEmbeddings, WriteEmbeddings};
+use finalfusion::io::ReadEmbeddings;
 use finalfusion::metadata::Metadata;
 use finalfusion::prelude::*;
 use toml::Value;
 
-use crate::io::EmbeddingFormat;
+use crate::io::{write_embeddings, EmbeddingFormat};
 use crate::FinalfusionApp;
 
 // Option constants
@@ -138,7 +136,13 @@ impl FinalfusionApp for ConvertApp {
             embeddings.set_metadata(metadata);
         }
 
-        write_embeddings(&embeddings, &self).context("Cannot write embeddings")
+        write_embeddings(
+            &embeddings,
+            &self.output_filename,
+            self.output_format,
+            self.unnormalize,
+        )
+        .context("Cannot write embeddings")
     }
 }
 
@@ -183,27 +187,4 @@ fn read_embeddings(
         "Cannot read {} embeddings from {}",
         embedding_format, filename
     ))
-}
-
-fn write_embeddings(
-    embeddings: &Embeddings<VocabWrap, StorageWrap>,
-    config: &ConvertApp,
-) -> Result<()> {
-    let f = File::create(&config.output_filename).context(format!(
-        "Cannot create embeddings file: {}",
-        config.output_filename
-    ))?;
-    let mut writer = BufWriter::new(f);
-
-    use self::EmbeddingFormat::*;
-    match config.output_format {
-        FastText => bail!("Writing to the fastText format is not supported"),
-        FinalFusion => embeddings.write_embeddings(&mut writer)?,
-        FinalFusionMmap => bail!("Writing to memory-mapped finalfusion file is not supported"),
-        Word2Vec => embeddings.write_word2vec_binary(&mut writer, config.unnormalize)?,
-        Text => embeddings.write_text(&mut writer, config.unnormalize)?,
-        TextDims => embeddings.write_text_dims(&mut writer, config.unnormalize)?,
-    };
-
-    Ok(())
 }
