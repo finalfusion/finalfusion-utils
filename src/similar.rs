@@ -8,12 +8,14 @@ use stdinout::Input;
 
 use super::FinalfusionApp;
 use crate::io::{read_embeddings_view, EmbeddingFormat};
+use crate::similarity::SimilarityMeasure;
 
 pub struct SimilarApp {
     embeddings_filename: String,
     embedding_format: EmbeddingFormat,
     input: Option<String>,
     k: usize,
+    similarity: SimilarityMeasure,
 }
 
 impl FinalfusionApp for SimilarApp {
@@ -43,6 +45,7 @@ impl FinalfusionApp for SimilarApp {
                     .takes_value(true)
                     .default_value("10"),
             )
+            .arg(SimilarityMeasure::new_clap_arg())
             .arg(
                 Arg::with_name("EMBEDDINGS")
                     .help("Embeddings file")
@@ -75,7 +78,10 @@ impl FinalfusionApp for SimilarApp {
             .transpose()?
             .unwrap();
 
+        let similarity = SimilarityMeasure::parse_clap_matches(&matches)?;
+
         Ok(SimilarApp {
+            similarity,
             input,
             embeddings_filename,
             embedding_format,
@@ -105,7 +111,7 @@ impl FinalfusionApp for SimilarApp {
             };
 
             for similar in results {
-                println!("{}\t{}", similar.word, similar.similarity);
+                println!("{}\t{}", similar.word, self.similarity.to_f32(&similar));
             }
         }
 
