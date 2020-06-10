@@ -21,6 +21,8 @@ mod select;
 
 mod similar;
 
+mod similarity;
+
 mod traits;
 pub use self::traits::FinalfusionApp;
 

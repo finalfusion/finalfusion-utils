@@ -8,6 +8,7 @@ use finalfusion::similarity::Analogy;
 use stdinout::Input;
 
 use crate::io::{read_embeddings_view, EmbeddingFormat};
+use crate::similarity::SimilarityMeasure;
 use crate::FinalfusionApp;
 
 pub struct AnalogyApp {
@@ -16,6 +17,7 @@ pub struct AnalogyApp {
     input_filename: Option<String>,
     excludes: [bool; 3],
     k: usize,
+    similarity: SimilarityMeasure,
 }
 
 impl FinalfusionApp for AnalogyApp {
@@ -45,6 +47,7 @@ impl FinalfusionApp for AnalogyApp {
                     .takes_value(true)
                     .default_value("10"),
             )
+            .arg(SimilarityMeasure::new_clap_arg())
             .arg(
                 Arg::with_name("EMBEDDINGS")
                     .help("Embeddings file")
@@ -90,12 +93,15 @@ impl FinalfusionApp for AnalogyApp {
             })
             .unwrap_or_else(|| [true, true, true]);
 
+        let similarity = SimilarityMeasure::parse_clap_matches(&matches)?;
+
         Ok(AnalogyApp {
             embeddings_filename,
             embedding_format,
             input_filename,
             excludes,
             k,
+            similarity,
         })
     }
 
@@ -131,7 +137,7 @@ impl FinalfusionApp for AnalogyApp {
             };
 
             for analogy in results {
-                println!("{}\t{}", analogy.word, analogy.similarity);
+                println!("{}\t{}", analogy.word, self.similarity.to_f32(&analogy));
             }
         }
 
