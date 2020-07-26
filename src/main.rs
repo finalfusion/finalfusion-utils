@@ -1,3 +1,12 @@
+#[cfg(feature = "netlib")]
+extern crate netlib_src;
+
+#[cfg(feature = "openblas")]
+extern crate openblas_src;
+
+#[cfg(feature = "intel-mkl")]
+extern crate intel_mkl_src;
+
 use std::io::stdout;
 
 use anyhow::Result;
