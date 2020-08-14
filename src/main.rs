@@ -14,6 +14,8 @@ use clap::{App, AppSettings, Arg, Shell, SubCommand};
 
 mod analogy;
 
+mod bucket_to_explicit;
+
 mod compute_accuracy;
 
 mod convert;
@@ -47,6 +49,7 @@ fn main() -> Result<()> {
     // Known subapplications.
     let apps = vec![
         analogy::AnalogyApp::app(),
+        bucket_to_explicit::BucketToExplicitApp::app(),
         compute_accuracy::ComputeAccuracyApp::app(),
         convert::ConvertApp::app(),
         metadata::MetadataApp::app(),
@@ -71,6 +74,10 @@ fn main() -> Result<()> {
         "analogy" => {
             analogy::AnalogyApp::parse(matches.subcommand_matches("analogy").unwrap())?.run()
         }
+        "bucket-to-explicit" => bucket_to_explicit::BucketToExplicitApp::parse(
+            matches.subcommand_matches("bucket-to-explicit").unwrap(),
+        )?
+        .run(),
         "completions" => {
             let shell = matches
                 .subcommand_matches("completions")
