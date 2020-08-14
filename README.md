@@ -129,6 +129,14 @@ $ finalfusion metadata embeddings.fifu \
     > metadata.txt
 ~~~
 
+### Convert Bucket Vocab to Explicit Vocab
+~~~shell
+# Converts a hash-bucket based subword vocab to
+# one with explicitly stored n-grams.
+$ finalfusion bucket-to-explicit buckets.fifu \
+    explicit.fifu 
+~~~
+
 ### Print completion script
 
 ~~~shell
