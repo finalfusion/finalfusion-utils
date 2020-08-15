@@ -150,10 +150,7 @@ impl<'a> Eval<'a> {
             .analogy([&instance.query.0, &instance.query.1, &instance.query.2], 1)
             .map(|r| {
                 let result = r.first().unwrap();
-                (
-                    result.word == instance.answer,
-                    result.similarity.into_inner(),
-                )
+                (result.word() == instance.answer, result.cosine_similarity())
             })
             .unwrap_or((false, 0.));
 
