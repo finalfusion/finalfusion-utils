@@ -111,7 +111,7 @@ impl FinalfusionApp for SimilarApp {
             };
 
             for similar in results {
-                println!("{}\t{}", similar.word, self.similarity.to_f32(&similar));
+                println!("{}\t{}", similar.word(), self.similarity.to_f32(&similar));
             }
         }
 
