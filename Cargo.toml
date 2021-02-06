@@ -17,7 +17,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1"
 clap = "2"
-env_logger = "0.7"
+env_logger = "0.8"
 indicatif = "0.15"
 ndarray = "0.13"
 num_cpus = "1"
