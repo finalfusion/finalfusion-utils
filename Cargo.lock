@@ -109,7 +109,7 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c505375a294ec7cf79430c4ccb91ee1fab5f6390da3a264932fd303832a2de7"
 dependencies = [
- "num-complex",
+ "num-complex 0.2.4",
  "num-traits",
  "rand 0.5.6",
  "serde",
@@ -328,7 +328,7 @@ dependencies = [
  "fnv",
  "itertools",
  "memmap",
- "ndarray",
+ "ndarray 0.13.1",
  "ordered-float",
  "rand 0.7.3",
  "rand_xorshift",
@@ -348,7 +348,7 @@ dependencies = [
  "finalfusion",
  "indicatif",
  "intel-mkl-src",
- "ndarray",
+ "ndarray 0.14.0",
  "netlib-src",
  "num_cpus",
  "openblas-src",
@@ -460,7 +460,7 @@ checksum = "4bce9d3464fe3be72376bcbe3dc4df22dd368ca228b62e8415d2c7b09bb58677"
 dependencies = [
  "lapacke-sys",
  "libc",
- "num-complex",
+ "num-complex 0.2.4",
 ]
 
 [[package]]
@@ -537,11 +537,26 @@ dependencies = [
  "blas-src 0.2.1",
  "cblas-sys",
  "matrixmultiply",
- "num-complex",
+ "num-complex 0.2.4",
  "num-integer",
  "num-traits",
  "rawpointer",
  "rayon",
+]
+
+[[package]]
+name = "ndarray"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c0d5c9540a691d153064dc47a4db2504587a75eae07bf1d73f7a596ebc73c04"
+dependencies = [
+ "blas-src 0.6.1",
+ "cblas-sys",
+ "matrixmultiply",
+ "num-complex 0.3.1",
+ "num-integer",
+ "num-traits",
+ "rawpointer",
 ]
 
 [[package]]
@@ -554,8 +569,8 @@ dependencies = [
  "cauchy",
  "lapack-src",
  "lapacke",
- "ndarray",
- "num-complex",
+ "ndarray 0.13.1",
+ "num-complex 0.2.4",
  "num-traits",
  "rand 0.5.6",
 ]
@@ -579,6 +594,15 @@ dependencies = [
  "num-traits",
  "rand 0.5.6",
  "serde",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "747d632c0c558b87dbabbe6a82f3b4ae03720d0646ac5b7b4dae89394be5f2c5"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -804,7 +828,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1bfb1f615c3704d19503b4523103cbd561e4c123870f23b870dc8f5bb5fe034"
 dependencies = [
  "log",
- "ndarray",
+ "ndarray 0.13.1",
  "ndarray-linalg",
  "num-traits",
  "ordered-float",
