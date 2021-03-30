@@ -103,7 +103,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c06b9e1a9ea243aa7be8cf51e025562334a52674508cc02d8b54a99d4986a13"
 dependencies = [
- "num-complex",
+ "num-complex 0.3.1",
  "num-traits",
  "rand 0.7.3",
  "serde",
@@ -295,7 +295,7 @@ dependencies = [
  "fnv",
  "itertools",
  "memmap",
- "ndarray",
+ "ndarray 0.14.0",
  "ordered-float",
  "rand 0.8.3",
  "rand_xorshift",
@@ -315,7 +315,7 @@ dependencies = [
  "finalfusion",
  "indicatif",
  "intel-mkl-src",
- "ndarray",
+ "ndarray 0.15.1",
  "netlib-src",
  "num_cpus",
  "openblas-src",
@@ -439,7 +439,7 @@ checksum = "041b3cb380f92a53e317ea046d0e715d2302dae6d2f426bdf3ccf27a36ef40e9"
 dependencies = [
  "lapack-sys",
  "libc",
- "num-complex",
+ "num-complex 0.3.1",
 ]
 
 [[package]]
@@ -505,6 +505,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "matrixmultiply"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1300bdbea33ec2836b01ff1f5a6eed8bad66d0c31f94d9b7993407a8b054c3a1"
+dependencies = [
+ "rawpointer",
+]
+
+[[package]]
 name = "memchr"
 version = "2.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -538,12 +547,27 @@ dependencies = [
  "approx",
  "blas-src",
  "cblas-sys",
- "matrixmultiply",
- "num-complex",
+ "matrixmultiply 0.2.4",
+ "num-complex 0.3.1",
  "num-integer",
  "num-traits",
  "rawpointer",
  "rayon",
+]
+
+[[package]]
+name = "ndarray"
+version = "0.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc1372704f14bb132a49a6701c2238970a359ee0829fed481b522a63bf25456a"
+dependencies = [
+ "cblas-sys",
+ "libc",
+ "matrixmultiply 0.3.0",
+ "num-complex 0.4.0",
+ "num-integer",
+ "num-traits",
+ "rawpointer",
 ]
 
 [[package]]
@@ -554,8 +578,8 @@ checksum = "cdc47361363e2c1666112aae356b1798f6032c7b30ff3f43dda6f2b59ddd50b4"
 dependencies = [
  "cauchy",
  "lax",
- "ndarray",
- "num-complex",
+ "ndarray 0.14.0",
+ "num-complex 0.3.1",
  "num-traits",
  "rand 0.7.3",
  "thiserror",
@@ -579,6 +603,15 @@ dependencies = [
  "num-traits",
  "rand 0.7.3",
  "serde",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26873667bbbb7c5182d4a37c1add32cdf09f841af72da53318fdb81543c15085"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -813,7 +846,7 @@ checksum = "21454d33566a78b99f26de8b51d7de375208b8f3a749f6d11e51f233e5cea440"
 dependencies = [
  "lax",
  "log",
- "ndarray",
+ "ndarray 0.14.0",
  "ndarray-linalg",
  "num-traits",
  "ordered-float",
