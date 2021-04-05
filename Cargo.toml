@@ -40,7 +40,7 @@ default-features = false
 features = ["cblas", "lapacke", "system"]
 
 [dependencies.openblas-src]
-version = "0.9"
+version = "0.10"
 optional = true
 features = ["system"]
 
