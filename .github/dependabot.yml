@@ -1,0 +1,19 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: ndarray
+    versions:
+    - 0.14.0
+    - 0.15.0
+  - dependency-name: anyhow
+    versions:
+    - 1.0.39
+  - dependency-name: openblas-src
+    versions:
+    - 0.10.2
