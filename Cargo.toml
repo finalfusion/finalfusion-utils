@@ -27,6 +27,10 @@ finalfusion = "0.15"
 stdinout = "0.4"
 toml = "0.5"
 
+[dependencies.accelerate-src]
+version = "0.3"
+optional = true
+
 [dependencies.intel-mkl-src]
 version = "0.6"
 optional = true
@@ -47,6 +51,9 @@ features = ["system"]
 [features]
 default = []
 opq = ["reductive/opq-train"]
+
+# BLAS and LAPACK libraries.
+accelerate = ["opq", "ndarray/blas", "accelerate-src"]
 intel-mkl = ["opq", "ndarray/blas", "intel-mkl-src"]
 netlib = ["opq", "ndarray/blas", "netlib-src"]
 openblas = ["opq", "ndarray/blas", "openblas-src"]

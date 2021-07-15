@@ -1,3 +1,6 @@
+#[cfg(feature = "accelerate")]
+extern crate accelerate_src;
+
 #[cfg(feature = "netlib")]
 extern crate netlib_src;
 
