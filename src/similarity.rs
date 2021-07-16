@@ -37,7 +37,7 @@ impl SimilarityMeasure {
         Ok(measure)
     }
 
-    pub fn to_f32(&self, result: &WordSimilarityResult) -> f32 {
+    pub fn as_f32(&self, result: &WordSimilarityResult) -> f32 {
         use self::SimilarityMeasure::*;
         match self {
             Angular => result.angular_similarity(),

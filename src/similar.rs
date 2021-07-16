@@ -81,11 +81,11 @@ impl FinalfusionApp for SimilarApp {
         let similarity = SimilarityMeasure::parse_clap_matches(&matches)?;
 
         Ok(SimilarApp {
-            similarity,
-            input,
             embeddings_filename,
             embedding_format,
+            input,
             k,
+            similarity,
         })
     }
 
@@ -111,7 +111,7 @@ impl FinalfusionApp for SimilarApp {
             };
 
             for similar in results {
-                println!("{}\t{}", similar.word(), self.similarity.to_f32(&similar));
+                println!("{}\t{}", similar.word(), self.similarity.as_f32(&similar));
             }
         }
 

@@ -137,7 +137,7 @@ impl FinalfusionApp for AnalogyApp {
             };
 
             for analogy in results {
-                println!("{}\t{}", analogy.word(), self.similarity.to_f32(&analogy));
+                println!("{}\t{}", analogy.word(), self.similarity.as_f32(&analogy));
             }
         }
 
