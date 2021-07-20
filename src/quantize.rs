@@ -204,7 +204,7 @@ impl FinalfusionApp for QuantizeApp {
             .context("Cannot read embeddings")?;
 
         // Quantize
-        let quantized_embeddings = quantize_embeddings(&self, &embeddings).into();
+        let quantized_embeddings = quantize_embeddings(&self, &embeddings)?.into();
         write_embeddings(
             &quantized_embeddings,
             &self.output_filename,
@@ -254,7 +254,7 @@ fn print_loss(storage: &dyn StorageView, quantized_storage: &dyn Storage) {
 fn quantize_embeddings<V, S>(
     config: &QuantizeApp,
     embeddings: &Embeddings<V, S>,
-) -> Embeddings<V, QuantizedArray>
+) -> Result<Embeddings<V, QuantizedArray>>
 where
     V: Vocab + Clone,
     S: StorageView,
@@ -264,13 +264,13 @@ where
         .unwrap_or(embeddings.storage().shape().1 / 2);
 
     match config.quantizer.as_str() {
-        "pq" => embeddings.quantize::<PQ<f32>>(
+        "pq" => Ok(embeddings.quantize::<PQ<f32>>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
-        ),
+        )?),
         quantizer => {
             eprintln!("Unknown quantizer: {}", quantizer);
             process::exit(1);
@@ -282,7 +282,7 @@ where
 fn quantize_embeddings<V, S>(
     config: &QuantizeApp,
     embeddings: &Embeddings<V, S>,
-) -> Embeddings<V, QuantizedArray>
+) -> Result<Embeddings<V, QuantizedArray>>
 where
     V: Vocab + Clone,
     S: StorageView,
@@ -291,31 +291,31 @@ where
         .n_subquantizers
         .unwrap_or(embeddings.storage().shape().1 / 2);
 
-    match config.quantizer.as_str() {
+    Ok(match config.quantizer.as_str() {
         "pq" => embeddings.quantize::<PQ<f32>>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
-        ),
+        )?,
         "opq" => embeddings.quantize::<OPQ>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
-        ),
+        )?,
         "gaussian_opq" => embeddings.quantize::<GaussianOPQ>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
-        ),
+        )?,
         quantizer => {
             eprintln!("Unknown quantizer: {}", quantizer);
             process::exit(1);
         }
-    }
+    })
 }
