@@ -35,7 +35,6 @@ optional = true
 version = "0.6"
 optional = true
 default-features = false
-features = ["mkl-static-ilp64-seq"]
 
 [dependencies.netlib-src]
 version = "0.8"
@@ -54,6 +53,7 @@ opq = ["reductive/opq-train"]
 
 # BLAS and LAPACK libraries.
 accelerate = ["opq", "ndarray/blas", "accelerate-src"]
-intel-mkl = ["opq", "ndarray/blas", "intel-mkl-src"]
+intel-mkl = ["opq", "ndarray/blas", "intel-mkl-src/mkl-static-ilp64-seq", "intel-mkl-src/download"]
+intel-mkl-amd = ["opq", "ndarray/blas", "intel-mkl-src/mkl-dynamic-ilp64-seq"]
 netlib = ["opq", "ndarray/blas", "netlib-src"]
 openblas = ["opq", "ndarray/blas", "openblas-src"]
