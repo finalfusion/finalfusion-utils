@@ -12,50 +12,53 @@ analogy queries as well as evaluation on analogy datasets.
 
 ## Installation
 
+### Precompiled binaries
+
+The following precompiled binaries can be found on the
+[releases page](https://github.com/finalfusion/finalfusion-utils/releases):
+
+* `x86_64-unknown-linux-gnu-mkl`: glibc Linux build, statically linked
+  against Intel MKL. This is the recommended build for Intel (non-AMD)
+  CPUs.
+* `x86_64-unknown-linux-musl`: static Linux build using the MUSL C
+  library. This binary does not link against a BLAS/LAPACK implementation
+  and therefore does not support optimized product quantization.
+* `universal-macos`: dynamic macOS build. Supports both the x86_64 and
+  ARM64 architectures. Linked against the Accelerate framework for
+  BLAS/LAPACK.
+
+
 ### Using `cargo`
 
 `finalfusion-utils` can be installed using an up-to-date Rust
 toolchain, which can be installed with [rustup](https://rustup.rs).
 
-With a valid Rust toolchain, the crate is most easily
-installed through `cargo`:
+With a valid Rust toolchain, the crate is most easily installed through
+`cargo`:
 
 ~~~shell
 $ cargo install finalfusion-utils
 ~~~
 
-### Using Nix
+Typically, you will want to enable support for a BLAS/LAPACK library
+to speed up matrix multiplication and enable optimized product
+quantization support. In order to do so, run
 
-The development version of `finalfusion-utils` can be directly
-installed from its repository using the [Nix](https://nixos.org/nix/)
-package manager. To install the current version from the `master`
-branch into your user profile:
+~~~shell
+$ cargo install finalfusion-utils --features implementation
+~~~
 
-```bash
-$ nix-env -i \
-  -f https://github.com/finalfusion/finalfusion-utils/tarball/master
-```
+where `implementation` is one of the following:
 
-To install the latest release version of `finalfusion-utils`, we
-recommend you to use the [finalfusion package
-set](https://github.com/finalfusion/nix-packages). To install the
-current release version into your user profile:
-
-```bash
-nix-env -i \
-  -f https://github.com/finalfusion/nix-packages/tarball/master \
-  -A finalfusion-utils
-```
-
-You can get prebuilt Linux/macOS binaries using the [finalfusion
-Cachix cache](https://finalfusion.cachix.org):
-
-```bash
-# If you haven't installed Cachix yet:
-$ nix-env -iA cachix -f https://cachix.org/api/v1/install
-$ cachix use finalfusion
-```
-
+* `accelerate`: the macOS Accelerate framework.
+* `intel-mkl`: Intel MKL (downloaded and statically linked).
+* `intel-mkl-amd`: Intel MKL, preinstalled MKL libaries expected, override
+  CPU detection for AMD CPUs.
+* `netlib`: any compatible system BLAS/LAPACK implementation(s).
+* `openblas`: system-installed OpenBLAS. This option is discouraged,
+  unless the system OpenBLAS library is a single-threaded build with
+  locking. Otherwise, OpenBLAS' threading interacts badly with application
+  threads.
 
 ## Building from source
 
