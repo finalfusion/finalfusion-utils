@@ -6,14 +6,32 @@ on:
       - '*'
 
 jobs:
+  create-release:
+    name: create-release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.release.outputs.upload_url }}
+      ff_utils_version: ${{ env.FF_UTILS_VERSION }}
+    steps:
+    - name: Get release version
+      run: |
+        echo "FF_UTILS_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        echo "tag: ${{ env.TAG_NAME }}"   
+    - uses: actions/create-release@v1.0.0
+      id: release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+
   release-linux:
+    needs: ['create-release']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Get release version
-      run: |
-        echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        echo "tag: ${{ env.TAG_NAME }}"
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -27,39 +45,57 @@ jobs:
     - name: Create release archive
       id: create_archive
       run: |
-        ARCHIVE=finalfusion-${TAG_NAME}-x86_64-unknown-linux-musl.tar.gz
+        ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-x86_64-unknown-linux-musl.tar.gz
         strip target/release/finalfusion
         tar -czvf ${ARCHIVE} -C target/release finalfusion
         echo ::set-output name=ASSET::$ARCHIVE
-    - uses: actions/create-release@v1.0.0
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
+
     - uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ${{ steps.create_archive.outputs.ASSET }}
+        asset_name: ${{ steps.create_archive.outputs.ASSET }}
+        asset_content_type: application/gzip
+
+  release-linux-mkl:
+    needs: ['create-release']
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --features intel-mkl
+    - name: Create release archive
+      id: create_archive
+      run: |
+        ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-x86_64-unknown-linux-gnu-mkl.tar.gz
+        strip target/release/finalfusion
+        tar -czvf ${ARCHIVE} -C target/release finalfusion
+        echo ::set-output name=ASSET::$ARCHIVE
+    - uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{ steps.create_archive.outputs.ASSET }}
         asset_name: ${{ steps.create_archive.outputs.ASSET }}
         asset_content_type: application/gzip
 
   release-mac:
+    needs: ['create-release']
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v1
     - name: Remove command-line tools
       run: |
         sudo rm -rf /Library/Developer/CommandLineTools/SDKs/*
-    - name: Get release version
-      run: |
-        echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        echo "tag: ${{ env.TAG_NAME }}"
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -82,24 +118,15 @@ jobs:
     - name: Create release archive
       id: create_archive
       run: |
-        ARCHIVE=finalfusion-${TAG_NAME}-universal-macos.tar.gz
+        ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-universal-macos.tar.gz
         strip finalfusion
         tar -czvf ${ARCHIVE} finalfusion
         echo ::set-output name=ASSET::$ARCHIVE
-    - uses: actions/create-release@v1.0.0
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
     - uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ${{ steps.create_archive.outputs.ASSET }}
         asset_name: ${{ steps.create_archive.outputs.ASSET }}
         asset_content_type: application/gzip
