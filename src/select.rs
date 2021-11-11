@@ -49,6 +49,7 @@ impl FinalfusionApp for SelectApp {
                         "fasttext",
                         "finalfusion",
                         "finalfusion_mmap",
+                        "floret",
                         "text",
                         "textdims",
                         "word2vec",
