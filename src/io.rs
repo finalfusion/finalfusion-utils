@@ -5,6 +5,7 @@ use std::io::{BufReader, BufWriter};
 
 use anyhow::{anyhow, bail, Context, Error, Result};
 
+use finalfusion::compat::floret::ReadFloretText;
 use finalfusion::compat::text::{WriteText, WriteTextDims};
 use finalfusion::compat::word2vec::WriteWord2Vec;
 use finalfusion::io::WriteEmbeddings;
@@ -15,6 +16,7 @@ pub enum EmbeddingFormat {
     FastText,
     FinalFusion,
     FinalFusionMmap,
+    Floret,
     Word2Vec,
     Text,
     TextDims,
@@ -30,6 +32,7 @@ impl TryFrom<&str> for EmbeddingFormat {
             "fasttext" => Ok(FastText),
             "finalfusion" => Ok(FinalFusion),
             "finalfusion_mmap" => Ok(FinalFusionMmap),
+            "floret" => Ok(Floret),
             "word2vec" => Ok(Word2Vec),
             "text" => Ok(Text),
             "textdims" => Ok(TextDims),
@@ -45,6 +48,7 @@ impl fmt::Display for EmbeddingFormat {
             FastText => "fasttext",
             FinalFusion => "finalfusion",
             FinalFusionMmap => "finalfusion_mmap",
+            Floret => "floret",
             Word2Vec => "word2vec",
             Text => "text",
             TextDims => "textdims",
@@ -66,6 +70,7 @@ pub fn read_embeddings(
         FastText => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
         FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
         FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
+        Floret => ReadFloretText::read_floret_text(&mut reader).map(Embeddings::into),
         Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
         Text => ReadText::read_text(&mut reader).map(Embeddings::into),
         TextDims => ReadTextDims::read_text_dims(&mut reader).map(Embeddings::into),
@@ -86,6 +91,7 @@ pub fn read_embeddings_view(
         FastText => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
         FinalFusion => ReadEmbeddings::read_embeddings(&mut reader),
         FinalFusionMmap => MmapEmbeddings::mmap_embeddings(&mut reader),
+        Floret => ReadFloretText::read_floret_text(&mut reader).map(Embeddings::into),
         Word2Vec => ReadWord2Vec::read_word2vec_binary(&mut reader).map(Embeddings::into),
         Text => ReadText::read_text(&mut reader).map(Embeddings::into),
         TextDims => ReadTextDims::read_text_dims(&mut reader).map(Embeddings::into),
@@ -109,6 +115,7 @@ pub fn write_embeddings(
         FastText => bail!("Writing to the fastText format is not supported"),
         FinalFusion => embeddings.write_embeddings(&mut writer)?,
         FinalFusionMmap => bail!("Writing to memory-mapped finalfusion file is not supported"),
+        Floret => bail!("Writing to the floret format is not supported"),
         Word2Vec => embeddings.write_word2vec_binary(&mut writer, unnormalize)?,
         Text => embeddings.write_text(&mut writer, unnormalize)?,
         TextDims => embeddings.write_text_dims(&mut writer, unnormalize)?,

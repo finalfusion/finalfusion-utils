@@ -4,6 +4,7 @@ use std::io::{BufReader, Read};
 
 use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
+use finalfusion::compat::floret::ReadFloretText;
 use finalfusion::io::ReadEmbeddings;
 use finalfusion::metadata::Metadata;
 use finalfusion::prelude::*;
@@ -174,6 +175,7 @@ fn read_embeddings(
         (FastText, false) => ReadFastText::read_fasttext(&mut reader).map(Embeddings::into),
         (FinalFusion, _) => ReadEmbeddings::read_embeddings(&mut reader),
         (FinalFusionMmap, _) => MmapEmbeddings::mmap_embeddings(&mut reader),
+        (Floret, _) => ReadFloretText::read_floret_text(&mut reader).map(Embeddings::into),
         (Word2Vec, true) => {
             ReadWord2Vec::read_word2vec_binary_lossy(&mut reader).map(Embeddings::into)
         }

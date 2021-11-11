@@ -303,19 +303,20 @@ dependencies = [
 [[package]]
 name = "finalfusion"
 version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fad569dd4dce25a577dc583b25ce019df19aa04496a73f113c7317556e3a880"
+source = "git+http://github.com/finalfusion/finalfusion-rust.git#fd30612beaf49e6aa8be1188efa3cbbbdf61609c"
 dependencies = [
  "byteorder",
  "fnv",
  "itertools 0.10.1",
  "memmap2",
+ "murmur3",
  "ndarray",
  "ordered-float",
  "rand",
  "rand_chacha",
  "reductive",
  "serde",
+ "smallvec",
  "thiserror",
  "toml",
 ]
@@ -541,6 +542,12 @@ checksum = "59accc507f1338036a0477ef61afdae33cde60840f4dfe481319ce3ad116ddf9"
 dependencies = [
  "autocfg",
 ]
+
+[[package]]
+name = "murmur3"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ead5388e485d38e622630c6b05afd3761a6701ff15c55b279ea5b31dcb62cff"
 
 [[package]]
 name = "ndarray"
@@ -899,6 +906,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "smallvec"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ecab6c735a6bb4139c0caafd0cc3635748bbb3acf4550e8138122099251f309"
 
 [[package]]
 name = "socket2"
