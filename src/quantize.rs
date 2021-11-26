@@ -81,7 +81,14 @@ impl FinalfusionApp for QuantizeApp {
                     .long("from")
                     .value_name("FORMAT")
                     .takes_value(true)
-                    .possible_values(&["fasttext", "finalfusion", "text", "textdims", "word2vec"])
+                    .possible_values(&[
+                        "fasttext",
+                        "finalfusion",
+                        "floret",
+                        "text",
+                        "textdims",
+                        "word2vec",
+                    ])
                     .default_value("word2vec"),
             )
             .arg(
