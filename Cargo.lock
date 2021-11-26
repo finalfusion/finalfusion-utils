@@ -303,7 +303,7 @@ dependencies = [
 [[package]]
 name = "finalfusion"
 version = "0.16.0"
-source = "git+http://github.com/finalfusion/finalfusion-rust.git#fd30612beaf49e6aa8be1188efa3cbbbdf61609c"
+source = "git+http://github.com/finalfusion/finalfusion-rust.git#e02fd622fc35c221256de561b13a11034a7e3bd5"
 dependencies = [
  "byteorder",
  "fnv",
