@@ -30,24 +30,30 @@ jobs:
   release-linux:
     needs: ['create-release']
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
     steps:
     - uses: actions/checkout@v1
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
         toolchain: stable
-        target: x86_64-unknown-linux-musl
         override: true
     - uses: actions-rs/cargo@v1
       with:
+        use-cross: true
         command: build
-        args: --release
+        args: --release --target=${{ matrix.target }}
     - name: Create release archive
       id: create_archive
       run: |
-        ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-x86_64-unknown-linux-musl.tar.gz
-        strip target/release/finalfusion
-        tar -czvf ${ARCHIVE} -C target/release finalfusion
+        ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-${{ matrix.target }}.tar.gz
+        tar -czvf ${ARCHIVE} -C target/${{ matrix.target }}/release finalfusion
         echo ::set-output name=ASSET::$ARCHIVE
 
     - uses: actions/upload-release-asset@v1.0.1
@@ -61,7 +67,7 @@ jobs:
 
   release-linux-mkl:
     needs: ['create-release']
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - uses: actions-rs/toolchain@v1
@@ -70,14 +76,15 @@ jobs:
         toolchain: stable
     - uses: actions-rs/cargo@v1
       with:
+        use-cross: true
         command: build
-        args: --release --features intel-mkl
+        args: --target=x86_64-unknown-linux-gnu --release --features intel-mkl
     - name: Create release archive
       id: create_archive
       run: |
         ARCHIVE=finalfusion-${{ needs.create-release.outputs.ff_utils_version }}-x86_64-unknown-linux-gnu-mkl.tar.gz
-        strip target/release/finalfusion
-        tar -czvf ${ARCHIVE} -C target/release finalfusion
+        strip target/x86_64-unknown-linux-gnu/release/finalfusion
+        tar -czvf ${ARCHIVE} -C target/x86_64-unknown-linux-gnu/release finalfusion
         echo ::set-output name=ASSET::$ARCHIVE
     - uses: actions/upload-release-asset@v1.0.1
       env:
