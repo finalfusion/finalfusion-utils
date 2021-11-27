@@ -47,13 +47,16 @@ version = "0.9"
 optional = true
 features = ["system"]
 
+[build-dependencies]
+openssl = { version = "0.10", optional = true }
+
 [features]
 default = []
 opq = ["reductive/opq-train"]
 
 # BLAS and LAPACK libraries.
 accelerate = ["opq", "ndarray/blas", "accelerate-src"]
-intel-mkl = ["opq", "ndarray/blas", "intel-mkl-src/mkl-static-lp64-seq", "intel-mkl-src/download"]
+intel-mkl = ["opq", "ndarray/blas", "intel-mkl-src/mkl-static-lp64-seq", "intel-mkl-src/download", "openssl/vendored"]
 intel-mkl-amd = ["opq", "ndarray/blas", "intel-mkl-src/mkl-dynamic-lp64-seq"]
 netlib = ["opq", "ndarray/blas", "netlib-src"]
 openblas = ["opq", "ndarray/blas", "openblas-src"]
