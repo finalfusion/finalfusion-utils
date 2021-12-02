@@ -1,6 +1,6 @@
 [package]
 name = "finalfusion-utils"
-version = "0.13.1"
+version = "0.13.2"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 edition = "2018"
 description = "finalfusion utilities"
