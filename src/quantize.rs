@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::process;
 
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result};
 use clap::{App, Arg, ArgMatches};
 use finalfusion::embeddings::Quantize;
 use finalfusion::prelude::*;
@@ -9,9 +9,9 @@ use finalfusion::storage::{QuantizedArray, Storage, StorageView};
 use finalfusion::vocab::Vocab;
 use ndarray::ArrayView1;
 use rayon::ThreadPoolBuilder;
-use reductive::pq::PQ;
+use reductive::pq::Pq;
 #[cfg(feature = "opq")]
-use reductive::pq::{GaussianOPQ, OPQ};
+use reductive::pq::{GaussianOpq, Opq};
 
 use crate::io::{read_embeddings_view, write_embeddings, EmbeddingFormat};
 use crate::FinalfusionApp;
@@ -180,11 +180,6 @@ impl FinalfusionApp for QuantizeApp {
             })
             .transpose()?
             .unwrap();
-        ensure!(
-            quantizer_bits > 0 && quantizer_bits <= 8,
-            "The number of quantizer bits should be in [1, 8], was: {}",
-            quantizer_bits
-        );
 
         Ok(QuantizeApp {
             input_filename,
@@ -271,7 +266,7 @@ where
         .unwrap_or(embeddings.storage().shape().1 / 2);
 
     match config.quantizer.as_str() {
-        "pq" => Ok(embeddings.quantize::<PQ<f32>>(
+        "pq" => Ok(embeddings.quantize::<Pq<f32>>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
@@ -299,21 +294,21 @@ where
         .unwrap_or(embeddings.storage().shape().1 / 2);
 
     Ok(match config.quantizer.as_str() {
-        "pq" => embeddings.quantize::<PQ<f32>>(
+        "pq" => embeddings.quantize::<Pq<f32>>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
         )?,
-        "opq" => embeddings.quantize::<OPQ>(
+        "opq" => embeddings.quantize::<Opq>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,
             config.n_attempts,
             true,
         )?,
-        "gaussian_opq" => embeddings.quantize::<GaussianOPQ>(
+        "gaussian_opq" => embeddings.quantize::<GaussianOpq>(
             n_subquantizers,
             config.quantizer_bits,
             config.n_iterations,

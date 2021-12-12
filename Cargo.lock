@@ -302,8 +302,9 @@ dependencies = [
 
 [[package]]
 name = "finalfusion"
-version = "0.16.0"
-source = "git+http://github.com/finalfusion/finalfusion-rust.git#e02fd622fc35c221256de561b13a11034a7e3bd5"
+version = "0.17.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "896a994a7a86ff88f0c1b449d8f4c0cd836b83d172836d2d9ce90e9e7a3cd80b"
 dependencies = [
  "byteorder",
  "fnv",
@@ -543,9 +544,9 @@ checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
 
 [[package]]
 name = "memmap2"
-version = "0.3.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20ff203f7bdc401350b1dbaa0355135777d25f41c0bbc601851bbd6cf61e8ff5"
+checksum = "4647a11b578fead29cdbb34d4adef8dd3dc35b876c9c6d5240d83f205abfe96e"
 dependencies = [
  "libc",
 ]
@@ -856,9 +857,9 @@ dependencies = [
 
 [[package]]
 name = "reductive"
-version = "0.7.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e477ad04a955c6f8a1b5592ee6b94d93b626a506c915201bfc085c5b71706a7"
+checksum = "7178e6a493368141ea460b21e5db07d70207091b85344a46d7cb2b405d02b752"
 dependencies = [
  "lax",
  "log",
@@ -871,6 +872,7 @@ dependencies = [
  "rand_core",
  "rand_xorshift",
  "rayon",
+ "thiserror",
 ]
 
 [[package]]
