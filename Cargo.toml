@@ -48,6 +48,10 @@ optional = true
 features = ["system"]
 
 [build-dependencies]
+# Fix incompatibility between anyhow and intel-mkl-tool. Remove with
+# the next release of intel-mkl-tool. For more information, see:
+# https://github.com/rust-math/intel-mkl-src/issues/68
+anyhow = { version = "<=1.0.48" }
 openssl = { version = "0.10", optional = true }
 
 [features]
