@@ -93,7 +93,7 @@ impl FinalfusionApp for AnalogyApp {
             })
             .unwrap_or_else(|| [true, true, true]);
 
-        let similarity = SimilarityMeasure::parse_clap_matches(&matches)?;
+        let similarity = SimilarityMeasure::parse_clap_matches(matches)?;
 
         Ok(AnalogyApp {
             embeddings_filename,
@@ -125,7 +125,7 @@ impl FinalfusionApp for AnalogyApp {
             );
 
             let results = match embeddings.analogy_masked(
-                [&split_line[0], &split_line[1], &split_line[2]],
+                [split_line[0], split_line[1], split_line[2]],
                 self.excludes,
                 self.k,
             ) {

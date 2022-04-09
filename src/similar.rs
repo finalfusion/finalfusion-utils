@@ -78,7 +78,7 @@ impl FinalfusionApp for SimilarApp {
             .transpose()?
             .unwrap();
 
-        let similarity = SimilarityMeasure::parse_clap_matches(&matches)?;
+        let similarity = SimilarityMeasure::parse_clap_matches(matches)?;
 
         Ok(SimilarApp {
             embeddings_filename,

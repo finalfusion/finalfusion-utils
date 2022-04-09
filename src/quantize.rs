@@ -206,7 +206,7 @@ impl FinalfusionApp for QuantizeApp {
             .context("Cannot read embeddings")?;
 
         // Quantize
-        let quantized_embeddings = quantize_embeddings(&self, &embeddings)?.into();
+        let quantized_embeddings = quantize_embeddings(self, &embeddings)?.into();
         write_embeddings(
             &quantized_embeddings,
             &self.output_filename,

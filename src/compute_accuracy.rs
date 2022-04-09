@@ -259,7 +259,7 @@ fn process_analogies(embeddings: &Embeddings<VocabWrap, StorageViewWrap>, instan
     pb.set_style(
         ProgressStyle::default_bar().template("{bar:30} {percent}% {msg} ETA: {eta_precise}"),
     );
-    let eval = Eval::new(&embeddings);
+    let eval = Eval::new(embeddings);
     instances.par_iter().enumerate().for_each(|(i, instance)| {
         if i % 50 == 0 {
             pb.inc(50);
